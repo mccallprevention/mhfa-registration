@@ -1,9 +1,14 @@
+export type TrainingType = "MHFA" | "QPR";
+
 export interface Event {
   id: string;
   title: string;
   date: string;
-  time: string;
+  startTime: string;  
+  endTime: string;   
   location: string;
+  address?: string;   
+  trainingType: TrainingType;
   googleFormBaseUrl: string;
   dateEntryId: string;
   locationEntryId: string;

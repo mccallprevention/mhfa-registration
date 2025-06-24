@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { Event, EventDisplay, UrlValidationResult } from "./types"
+import { TrainingType } from "./types"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -26,6 +27,22 @@ export function formatTime(timeString: string): string {
     minute: '2-digit',
     hour12: true
   })
+}
+
+// NEW: Format time range for display
+export function formatTimeRange(startTime: string, endTime: string): string {
+  const formatSingleTime = (timeString: string) => {
+    const [hours, minutes] = timeString.split(':');
+    const date = new Date();
+    date.setHours(parseInt(hours), parseInt(minutes));
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+  
+  return `${formatSingleTime(startTime)} - ${formatSingleTime(endTime)}`;
 }
 
 // Google Forms URL utilities - Updated for MHFA project requirements
@@ -110,11 +127,11 @@ export function isEventUpcoming(eventDate: string): boolean {
   return eventDateObj >= today
 }
 
-// Convert Event to EventDisplay with computed properties
+// Convert Event to EventDisplay with computed properties - UPDATED
 export function enrichEventForDisplay(event: Event): EventDisplay {
   const isUpcoming = isEventUpcoming(event.date)
   const displayDate = formatDate(event.date)
-  const displayTime = formatTime(event.time)
+  const displayTime = formatTimeRange(event.startTime, event.endTime)  // UPDATED
   const prefillUrl = generatePrefillUrl(event)
   
   return {
@@ -157,12 +174,15 @@ export function formatDateForSheets(date: Date): string {
   return date.toISOString()
 }
 
-// Parse event form data and add metadata
+// Parse event form data and add metadata - UPDATED
 export function createEventFromForm(formData: {
   title: string
   date: string
-  time: string
+  startTime: string      // RENAMED from 'time'
+  endTime: string        // NEW
   location: string
+  address?: string       // NEW
+  trainingType: TrainingType
   googleFormBaseUrl: string
   dateEntryId: string
   locationEntryId: string
@@ -175,8 +195,11 @@ export function createEventFromForm(formData: {
     id: generateEventId(),
     title: formData.title,
     date: formData.date,
-    time: formData.time,
+    startTime: formData.startTime,      // RENAMED
+    endTime: formData.endTime,          // NEW
     location: formData.location,
+    address: formData.address,          // NEW
+    trainingType: formData.trainingType,
     googleFormBaseUrl: formData.googleFormBaseUrl,
     dateEntryId: formData.dateEntryId,
     locationEntryId: formData.locationEntryId,
