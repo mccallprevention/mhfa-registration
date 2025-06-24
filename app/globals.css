@@ -4,48 +4,60 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* McCall Brand Colors */
+    --mccall-navy: 206 100% 17%; /* #003057 */
+    --mccall-mid-blue: 203 90% 24%; /* #054a76 */
+    --mccall-green: 84 100% 37%; /* #80bc00 */
+    --mccall-light-green: 79 57% 55%; /* #bcd63e */
+    --mccall-gold: 41 100% 58%; /* #ffc629 */
+    --mccall-light-gold: 34 95% 61%; /* #fbac40 */
+    --mccall-beige: 60 29% 94%; /* #f5f2e8 */
+    --mccall-cream: 47 31% 93%; /* #f4eee1 */
+    
+    /* System Colors mapped to McCall brand */
+    --background: 47 31% 93%; /* cream background */
+    --foreground: 206 100% 17%; /* navy text */
+    --card: 0 0% 100%; /* white cards */
+    --card-foreground: 206 100% 17%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 206 100% 17%;
+    --primary: 206 100% 17%; /* navy */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 84 100% 37%; /* green */
+    --secondary-foreground: 0 0% 100%;
+    --muted: 60 29% 94%; /* beige */
+    --muted-foreground: 206 100% 25%;
+    --accent: 41 100% 58%; /* gold */
+    --accent-foreground: 206 100% 17%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
+    --border: 206 30% 86%;
+    --input: 206 30% 86%;
+    --ring: 84 100% 37%; /* green focus */
+    --radius: 1rem; /* McCall uses rounded corners */
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    /* Keep dark mode minimal for MVP */
+    --background: 206 100% 12%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    --card: 206 100% 15%;
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+    --popover: 206 100% 15%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
+    --primary: 84 100% 37%;
+    --primary-foreground: 206 100% 17%;
+    --secondary: 206 100% 17%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
+    --muted: 206 30% 25%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 41 100% 58%;
+    --accent-foreground: 206 100% 17%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 94.1%;
+    --border: 206 30% 25%;
+    --input: 206 30% 25%;
+    --ring: 84 100% 37%;
   }
 }
 
@@ -55,6 +67,52 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "acumin-pro", Acumen, Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.5em;
+    color: rgba(0, 48, 87, 0.75); /* McCall's specific text opacity */
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold text-mccall-navy;
+    line-height: 1.2;
+  }
+}
+
+/* McCall-specific utility classes */
+@layer utilities {
+  .bg-mccall-gradient-blue {
+    background: linear-gradient(40deg, hsl(var(--mccall-navy)) 0%, hsl(var(--mccall-mid-blue)) 100%);
+  }
+  
+  .bg-mccall-gradient-green {
+    background: linear-gradient(40deg, hsl(var(--mccall-green)) 0%, hsl(var(--mccall-light-green)) 100%);
+  }
+  
+  .bg-mccall-gradient-gold {
+    background: linear-gradient(40deg, hsl(var(--mccall-light-gold)) 0%, hsl(var(--mccall-gold)) 100%);
+  }
+  
+  .text-mccall-navy {
+    color: hsl(var(--mccall-navy));
+  }
+  
+  .text-mccall-green {
+    color: hsl(var(--mccall-green));
+  }
+  
+  .bg-mccall-navy {
+    background-color: hsl(var(--mccall-navy));
+  }
+  
+  .bg-mccall-green {
+    background-color: hsl(var(--mccall-green));
+  }
+  
+  .bg-mccall-beige {
+    background-color: hsl(var(--mccall-beige));
+  }
+  
+  .bg-mccall-cream {
+    background-color: hsl(var(--mccall-cream));
   }
 }
