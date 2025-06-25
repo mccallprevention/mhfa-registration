@@ -13,7 +13,6 @@ export default function Home() {
   const [activeFilter, setActiveFilter] = useState<FilterOption>("all");
   const [currentLanguage, setCurrentLanguage] = useState<"en" | "es">("en");
 
-  // --- START: MODIFIED CODE ---
 
   const filteredEvents = sampleEvents
     // 1. First, filter the events to match the current language.
@@ -21,7 +20,7 @@ export default function Home() {
     // 2. Then, apply the training type filter (or show all if "all" is selected).
     .filter(event => activeFilter === "all" || event.trainingType === activeFilter);
     
-  // --- END: MODIFIED CODE ---
+
 
   const handleLanguageChange = (language: "en" | "es") => {
     setCurrentLanguage(language);
@@ -34,8 +33,9 @@ export default function Home() {
       {/* Header with McCall branding */}
       <header className="bg-[#003057] text-white">
         <div className="container mx-auto px-4 py-4">
+          {/* NOTE: the only change is the extra mr-4 on LogoHeader */}
           <div className="flex items-center justify-between">
-            <LogoHeader />
+            <LogoHeader className="mr-4 sm:mr-6" />   
             <LanguageToggle onLanguageChange={handleLanguageChange} />
           </div>
         </div>
