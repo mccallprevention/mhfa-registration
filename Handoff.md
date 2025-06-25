@@ -1,18 +1,15 @@
-
+# 🚀 Event Registration Platform - Development Handoff Document
 
 > **Note to Future Developers & Maintainers:**
 >
 > The goal of this document is to make it so that the next developer can just read this and hit the ground running.
 >
 > **Document Maintenance Protocol:**
-> 
+>
 > 1. This protocol must be retained in all subsequent versions of this document.  
 > 2. Upon completion of a feature, this document must be updated to reflect the current project status and any significant development choices.  
 > 3. Updates should detail architectural decisions, particularly those affecting file structure, shared utilities, or core business logic, to facilitate efficient onboarding.  
 > 4. The existing structure of this document should be preserved. Revisions should be additive unless a fundamental change in the project's strategic direction necessitates a structural overhaul.
->
-
-# 🚀 Event Registration Platform - Development Handoff Document
 
 *Last Updated: June 25, 2025*
 
@@ -62,11 +59,12 @@ Build a low-maintenance, low-cost, bilingual website that can:
 
 -----
 
-## ✅ CURRENT STATUS: Phase 2 - Branded, Bilingual UI Complete
+## ✅ CURRENT STATUS: Phase 2 Complete + Architecture Refactor
 
-### 🏆 **Major Milestone: Interactive Bilingual Event Filtering**
+### 🏆 **Major Milestones Achieved:**
 
-The public-facing front-end is feature-complete. It successfully displays events according to user selections for language and training type, is fully branded, and is free of known bugs.
+1. **Interactive Bilingual Event Filtering** - The public-facing front-end is feature-complete.
+2. **Architecture Refactoring** - Codebase has been refactored for maintainability and scalability.
 
 **✅ COMPLETED:**
 
@@ -77,6 +75,12 @@ The public-facing front-end is feature-complete. It successfully displays events
   - **Step E:** Full bilingual support, with distinct English and Spanish events and UI text.
   - **Step F:** **Core filtering logic implemented:** Events are now correctly filtered first by language, then by training type.
   - **Step G:** All known TypeScript, ESLint, and React Hydration errors have been resolved.
+  - **Step H (NEW):** **Architecture refactoring completed:**
+    - Fixed critical type duplication issue
+    - Implemented proper i18n translation system
+    - Extracted all constants and configuration
+    - Created reusable custom hooks
+    - Reduced sample data file from 600+ to ~100 lines
 
 **🎯 NEXT IMMEDIATE STEP:** Phase 3 - Admin Dashboard & API Routes
 
@@ -98,7 +102,11 @@ The public-facing front-end is feature-complete. It successfully displays events
 }
 ```
 
-**❗ Key Learning:** Without `baseUrl`, you get "is not a module" errors.
+**❗ Key Learning:** Without `baseUrl`, you get "is not a module" errors. All imports use `@/lib/...` pattern.
+
+### **Browser Extension Hydration Warnings**
+
+If you see hydration mismatch errors in development, they're likely caused by browser extensions (Grammarly, password managers, etc.). Solution: Add `suppressHydrationWarning` to both `<html>` and `<body>` tags in `layout.tsx`.
 
 ### **Git Workflow (Best Practice)**
 
@@ -155,17 +163,27 @@ npm run lint     # Runs the linter to check for code quality issues
 📁 mhfa-registration/
 ├── app/
 │   ├── globals.css         # 🎨 CRITICAL: McCall branding CSS variables
+│   ├── layout.tsx          # ✅ Root layout with hydration warning suppression
 │   └── page.tsx            # 🧠 The "brain": manages state & filtering
 ├── components/
 │   ├── ui/
+│   │   ├── button.tsx          # Base button component
+│   │   ├── card.tsx            # Base card components
 │   │   ├── logo-header.tsx     # ✅ Reusable McCall Logo component
 │   │   └── language-toggle.tsx # ✅ Interactive, responsive language toggle
 │   ├── event-card.tsx      # Displays a single event card
 │   └── training-filter.tsx # MHFA/QPR/All filter buttons
 └── lib/
+    ├── constants.ts        # ✅ NEW: Centralized configuration
     ├── types.ts            # ✅ Defines the shape of Event data (w/ language)
-    ├── utils.ts            # ✅ Language-aware utility functions
-    └── sample-data.ts      # ✅ Contains both English & Spanish sample events
+    ├── utils.ts            # ✅ Language-aware utility functions (FIXED)
+    ├── sample-data.ts      # ✅ DEPRECATED: Use sample-data-generator.ts
+    ├── sample-data-generator.ts # ✅ NEW: Dynamic sample data generation
+    ├── hooks/
+    │   └── useEventFilter.ts    # ✅ NEW: Reusable filtering logic
+    └── i18n/
+        ├── translations.ts      # ✅ NEW: Centralized translations
+        └── useTranslation.ts    # ✅ NEW: Translation hook
 ```
 
 ### **🧩 Type System (lib/types.ts)**
@@ -181,11 +199,11 @@ export interface Event {
   title: string;
   date: string;
   startTime: string;  
-  endTime: string;   
+  endTime: string;  
   location: string;
-  address?: string;   
+  address?: string;  
   trainingType: TrainingType;
-  language: Language;  // NEW: Language property
+  language: Language;
   googleFormBaseUrl: string;
   dateEntryId: string;
   locationEntryId: string;
@@ -213,228 +231,36 @@ export interface EventDisplay extends Event {
 
 ### **⚙️ Utility Functions (lib/utils.ts)**
 
-**✅ COMPLETE & BILINGUAL** - All type-safe and tested utility functions.
+**✅ FIXED** - No longer contains duplicate type definitions. All utilities are type-safe and properly import from `@/lib/types`.
+
+### **🌐 i18n Translation System (NEW)**
+
+**✅ COMPLETE** - Professional translation system replacing inline ternary operators.
 
 ```typescript
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
-import { Event, EventDisplay, UrlValidationResult, Language } from "./types"
-import { TrainingType } from "./types"
+// Usage in components:
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
+const { t } = useTranslation(currentLanguage);
+<h1>{t('hero.title')}</h1>
+```
 
-// Date formatting utilities with language support
-export function formatDate(dateString: string, language: Language = 'en'): string {
-  const date = new Date(dateString)
-  const locale = language === 'es' ? 'es-US' : 'en-US'
-  
-  return date.toLocaleDateString(locale, {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
+### **🎯 Custom Hooks (NEW)**
 
-export function formatTime(timeString: string, language: Language = 'en'): string {
-  const [hours, minutes] = timeString.split(':')
-  const date = new Date()
-  date.setHours(parseInt(hours), parseInt(minutes))
-  const locale = language === 'es' ? 'es-US' : 'en-US'
-  
-  return date.toLocaleTimeString(locale, {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  })
-}
+**✅ useEventFilter Hook** - Encapsulates all filtering logic with useful computed properties:
 
-// Format time range for display with language support
-export function formatTimeRange(startTime: string, endTime: string, language: Language = 'en'): string {
-  const locale = language === 'es' ? 'es-US' : 'en-US'
-  
-  const formatSingleTime = (timeString: string) => {
-    const [hours, minutes] = timeString.split(':');
-    const date = new Date();
-    date.setHours(parseInt(hours), parseInt(minutes));
-    return date.toLocaleTimeString(locale, {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
-  };
-  
-  return `${formatSingleTime(startTime)} - ${formatSingleTime(endTime)}`;
-}
-
-// Google Forms URL utilities - Updated for MHFA project requirements
-export function generatePrefillUrl(event: Event): string {
-  const params = new URLSearchParams({
-    usp: 'pp_url',
-    [event.dateEntryId]: event.date,
-    [event.locationEntryId]: event.location
-  });
-  
-  // URLSearchParams encodes spaces as '+', but Google Forms needs '%20'
-  const paramString = params.toString().replace(/\+/g, '%20');
-  
-  return `${event.googleFormBaseUrl}?${paramString}`;
-}
-
-// URL validation for Google Forms
-export async function validateGoogleFormUrl(url: string): Promise<UrlValidationResult> {
-  try {
-    const response = await fetch(url, {
-      method: 'HEAD', // Use HEAD to avoid downloading full content
-      mode: 'no-cors', // Handle CORS issues with Google Forms
-    })
-    
-    // Google Forms typically return 200 for valid forms or 302 for redirects
-    const isValid = response.status === 200 || response.status === 302
-    
-    return {
-      isValid,
-      status: response.status,
-      url
-    }
-  } catch (error) {
-    return {
-      isValid: false,
-      error: error instanceof Error ? error.message : 'Unknown validation error',
-      url
-    }
-  }
-}
-
-// Alternative validation method that works better with Google Forms CORS
-export function validateGoogleFormUrlBasic(url: string): UrlValidationResult {
-  try {
-    const urlObj = new URL(url)
-    
-    // Basic validation: should be a Google Forms URL
-    const isGoogleForm = urlObj.hostname === 'docs.google.com' && 
-                          urlObj.pathname.includes('/forms/')
-    
-    if (!isGoogleForm) {
-      return {
-        isValid: false,
-        error: 'URL must be a Google Forms link',
-        url
-      }
-    }
-    
-    return {
-      isValid: true,
-      url
-    }
-  } catch {
-    return {
-      isValid: false,
-      error: 'Invalid URL format',
-      url
-    }
-  }
-}
-
-// Event validation utilities
-export function isEventUpcoming(eventDate: string): boolean {
-  const today = new Date()
-  const eventDateObj = new Date(eventDate)
-  
-  // For MVP, simple date comparison works
-  // TODO: Add timezone support in future version
-  today.setHours(0, 0, 0, 0) // Reset time to start of day
-  eventDateObj.setHours(0, 0, 0, 0)
-  
-  return eventDateObj >= today
-}
-
-// Convert Event to EventDisplay with computed properties - UPDATED
-export function enrichEventForDisplay(event: Event): EventDisplay {
-  const isUpcoming = isEventUpcoming(event.date)
-  const displayDate = formatDate(event.date, event.language)
-  const displayTime = formatTimeRange(event.startTime, event.endTime, event.language)
-  const prefillUrl = generatePrefillUrl(event)
-  
-  return {
-    ...event,
-    isUpcoming,
-    displayDate,
-    displayTime,
-    prefillUrl
-  }
-}
-
-// Generate a unique ID for new events
-export function generateEventId(): string {
-  return `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-}
-
-// Utility to sort events by date
-export function sortEventsByDate(events: Event[], ascending: boolean = true): Event[] {
-  return [...events].sort((a, b) => {
-    const dateA = new Date(a.date)
-    const dateB = new Date(b.date)
-    return ascending ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime()
-  })
-}
-
-// Get events that need reminders (happening tomorrow)
-export function getEventsNeedingReminders(events: Event[]): Event[] {
-  const tomorrow = new Date()
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  const tomorrowString = tomorrow.toISOString().split('T')[0] // yyyy-MM-dd format
-  
-  return events.filter(event => 
-    event.isActive && 
-    event.date === tomorrowString
-  )
-}
-
-// Format date for Google Sheets/Make.com integration
-export function formatDateForSheets(date: Date): string {
-  return date.toISOString()
-}
-
-// Parse event form data and add metadata - UPDATED
-export function createEventFromForm(formData: {
-  title: string
-  date: string
-  startTime: string      
-  endTime: string        
-  location: string
-  address?: string       
-  trainingType: TrainingType
-  language: Language      // NEW
-  googleFormBaseUrl: string
-  dateEntryId: string
-  locationEntryId: string
-  isActive: boolean
-  timeZone?: string
-}): Event {
-  const now = new Date().toISOString()
-  
-  return {
-    id: generateEventId(),
-    title: formData.title,
-    date: formData.date,
-    startTime: formData.startTime,      
-    endTime: formData.endTime,          
-    location: formData.location,
-    address: formData.address,          
-    trainingType: formData.trainingType,
-    language: formData.language,        // NEW
-    googleFormBaseUrl: formData.googleFormBaseUrl,
-    dateEntryId: formData.dateEntryId,
-    locationEntryId: formData.locationEntryId,
-    isActive: formData.isActive,
-    timeZone: formData.timeZone,
-    createdAt: now,
-    updatedAt: now
-  }
-}
+```typescript
+const {
+  currentLanguage,
+  activeFilter,
+  setCurrentLanguage,
+  setActiveFilter,
+  filteredEvents,
+  eventCounts,        // { all: 10, MHFA: 6, QPR: 4 }
+  upcomingEventCounts,
+  hasEvents,
+  hasUpcomingEvents
+} = useEventFilter(sampleEvents);
 ```
 
 -----
@@ -455,21 +281,32 @@ const filteredEvents = sampleEvents
 
   - **Data:** The `language: "en" | "es"` property on the `Event` type is the foundation.
   - **Utils:** Functions in `lib/utils.ts` accept a `language` parameter for correct formatting.
-  - **UI:** The `page.tsx` uses ternary operators (`currentLanguage === "en" ? "..." : "..."`) to switch static UI text.
+  - **UI:** Now uses centralized translation system via `useTranslation` hook.
 
 ### **3. Brand as a Theme via CSS Variables**
 
   - All McCall brand colors are defined as CSS custom properties (variables) in `app/globals.css`.
-  - Tailwind configuration (`tailwind.config.js`) is extended to recognize these variables (e.g., `bg-mccall-navy`). This makes applying or updating the brand theme trivial.
+  - Tailwind configuration (`tailwind.config.js`) is extended to recognize these variables (e.g., `bg-mccall-navy`).
+  - Constants are now also available in `lib/constants.ts` for JavaScript usage.
 
 ### **4. Component Organization**
 
   - **`components/ui/`** is for generic, reusable primitives (e.g., a button, a logo).
   - **`components/`** is for specific, composite components that solve an app problem (e.g., an event card).
+  - **`lib/hooks/`** contains custom React hooks for reusable logic.
+  - **`lib/i18n/`** contains all internationalization/translation files.
 
 ### **5. HTML Semantics & Hydration Errors**
 
-  - A React hydration error was fixed in `event-card.tsx` by replacing a `<p>` tag that incorrectly wrapped a `<div>` with a `<div>` itself, ensuring valid HTML.
+  - React hydration errors from browser extensions are suppressed with `suppressHydrationWarning` on both `<html>` and `<body>` tags.
+  - Previous hydration error in `event-card.tsx` was fixed by replacing invalid `<p>` tag nesting.
+
+### **6. Architecture Refactoring (NEW)**
+
+  - **Type Safety:** Fixed critical type duplication bug where `utils.ts` contained full copy of all types.
+  - **Maintainability:** Sample data reduced from 600+ lines to ~100 lines with generator function.
+  - **Scalability:** All constants, translations, and reusable logic extracted to dedicated modules.
+  - **Import Pattern:** All imports now use `@/lib/...` pattern for consistency and reliability.
 
 -----
 
@@ -477,13 +314,50 @@ const filteredEvents = sampleEvents
 
 ### **🎯 Phase 3: Admin Dashboard (NEXT)**
 
-The plan for building the backend and admin interface remains the same.
+The codebase is now properly structured for building the backend and admin interface:
 
-1.  **Authentication Setup:** Create and protect an `/admin` route.
-2.  **API Routes:** Build `/api/events` for GET, POST, PUT, DELETE.
-3.  **Data Persistence:** Move event data from the local `sample-data.ts` to a server-side source accessed by the API.
-4.  **Event Management UI:** Build a simple admin UI for event CRUD.
+1. **Authentication Setup:** 
+   - Create and protect an `/admin` route
+   - Consider using NextAuth.js or Clerk for authentication
+
+2. **API Routes:** 
+   - Build `/api/events` for GET, POST, PUT, DELETE
+   - Leverage existing types and utilities from refactoring
+
+3. **Data Persistence:** 
+   - Move from `sample-data-generator.ts` to real database
+   - Consider Vercel KV, Supabase, or Google Sheets as backend
+
+4. **Event Management UI:** 
+   - Build admin UI using existing components
+   - Utilize `useEventFilter` hook for admin event viewing
+   - Reuse form validation from `createEventFromForm` utility
 
 ### **🎯 Phase 4: Email Automation**
 
-  - Set up Make.com scenarios to watch for Google Form submissions and send emails.
+  - Set up Make.com scenarios to watch for Google Form submissions
+  - Use `getEventsNeedingReminders` utility for reminder logic
+  - Leverage `formatDateForSheets` for data formatting
+
+### **📈 Technical Debt & Future Improvements**
+
+1. **Testing:** Add unit tests for utilities and integration tests for components
+2. **Error Handling:** Implement proper error boundaries and logging
+3. **Performance:** Consider implementing ISR for event pages
+4. **Accessibility:** Conduct full accessibility audit
+5. **SEO:** Add proper meta tags and structured data for events
+
+-----
+
+## 🎉 Ready for Phase 3!
+
+The codebase has been successfully refactored with:
+- ✅ Clean architecture
+- ✅ Type safety throughout
+- ✅ Reusable utilities and hooks
+- ✅ Professional i18n system
+- ✅ Centralized configuration
+- ✅ No TypeScript or ESLint errors
+- ✅ Browser extension compatibility
+
+The foundation is solid and ready for the admin dashboard implementation!
