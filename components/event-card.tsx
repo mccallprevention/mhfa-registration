@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Event } from "@/lib/types";
 import { formatDate, formatTimeRange, generatePrefillUrl } from "@/lib/utils";
 import { MapPin, Clock } from "lucide-react";
@@ -29,12 +29,10 @@ export function EventCard({ event }: EventCardProps) {
             />
             <div className="flex-1">
               <CardTitle className="text-xl text-mccall-navy mb-1">{event.title}</CardTitle>
-              <CardDescription className="text-base">
-                <div className="flex items-center gap-2 text-gray-600 mb-1">
-                  <Clock className="w-4 h-4" />
-                  <span>{formatDate(event.date)} • {formatTimeRange(event.startTime, event.endTime)}</span>
-                </div>
-              </CardDescription>
+              <div className="flex items-center gap-2 text-gray-600 text-sm">
+                <Clock className="w-4 h-4" />
+                <span>{formatDate(event.date)} • {formatTimeRange(event.startTime, event.endTime)}</span>
+              </div>
             </div>
           </div>
           <span className={`px-4 py-1.5 text-xs font-bold rounded-full ${

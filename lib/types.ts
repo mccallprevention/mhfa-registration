@@ -1,4 +1,5 @@
 export type TrainingType = "MHFA" | "QPR";
+export type Language = "en" | "es";
 
 export interface Event {
   id: string;
@@ -9,6 +10,7 @@ export interface Event {
   location: string;
   address?: string;   
   trainingType: TrainingType;
+  language: Language;  // NEW: Language property
   googleFormBaseUrl: string;
   dateEntryId: string;
   locationEntryId: string;

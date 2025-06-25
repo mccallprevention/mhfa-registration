@@ -6,7 +6,6 @@ import { LogoHeader } from "@/components/ui/logo-header";
 import { LanguageToggle } from "@/components/ui/language-toggle";
 import { sampleEvents } from "@/lib/sample-data";
 import { useState } from "react";
-import { Search } from "lucide-react";
 
 type FilterOption = "all" | "MHFA" | "QPR";
 
@@ -40,26 +39,27 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">
-              Mental Health Training Programs
+              {currentLanguage === "en" 
+                ? "Mental Health Training Programs"
+                : "Programas de Capacitación en Salud Mental"}
             </h1>
             <p className="text-xl opacity-90">
-              Join us for professional development opportunities in Mental Health First Aid (MHFA) 
-              and Question, Persuade, Refer (QPR) suicide prevention training.
+              {currentLanguage === "en"
+                ? "Join us for professional development opportunities in Mental Health First Aid (MHFA) and Question, Persuade, Refer (QPR) suicide prevention training."
+                : "Únase a nosotros para oportunidades de desarrollo profesional en Primeros Auxilios de Salud Mental (MHFA) y capacitación en prevención del suicidio Preguntar, Persuadir, Referir (QPR)."}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Search and filter section */}
+      {/* Filter section */}
       <div className="bg-white shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <div className="flex items-center gap-2 text-gray-600">
-              <Search className="w-5 h-5" />
-              <span className="font-medium">Find a training</span>
-            </div>
-            <TrainingFilter activeFilter={activeFilter} onFilterChange={setActiveFilter} />
-          </div>
+          <TrainingFilter 
+            activeFilter={activeFilter} 
+            onFilterChange={setActiveFilter}
+            currentLanguage={currentLanguage}
+          />
         </div>
       </div>
 
@@ -87,7 +87,9 @@ export default function Home() {
       <footer className="bg-[#003057] text-white py-8 mt-12">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm opacity-75">
-            © 2025 McCall Behavioral Health Network. All rights reserved.
+            {currentLanguage === "en"
+              ? "© 2025 McCall Behavioral Health Network. All rights reserved."
+              : "© 2025 McCall Behavioral Health Network. Todos los derechos reservados."}
           </p>
         </div>
       </footer>

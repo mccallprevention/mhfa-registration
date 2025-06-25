@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Languages } from "lucide-react";
 
 type Language = "en" | "es";

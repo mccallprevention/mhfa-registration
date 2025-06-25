@@ -5,9 +5,10 @@ type FilterOption = "all" | "MHFA" | "QPR";
 interface TrainingFilterProps {
   activeFilter: FilterOption;
   onFilterChange: (filter: FilterOption) => void;
+  currentLanguage?: "en" | "es";
 }
 
-export function TrainingFilter({ activeFilter, onFilterChange }: TrainingFilterProps) {
+export function TrainingFilter({ activeFilter, onFilterChange, currentLanguage = "en" }: TrainingFilterProps) {
   return (
     <div className="flex gap-3 flex-wrap">
       <Button
@@ -47,7 +48,7 @@ export function TrainingFilter({ activeFilter, onFilterChange }: TrainingFilterP
           }
         `}
       >
-        Show All
+        {currentLanguage === "en" ? "Show All" : "Mostrar Todo"}
       </Button>
     </div>
   );

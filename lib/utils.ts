@@ -1,16 +1,18 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { Event, EventDisplay, UrlValidationResult } from "./types"
+import { Event, EventDisplay, UrlValidationResult, Language } from "./types"
 import { TrainingType } from "./types"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// Date formatting utilities
-export function formatDate(dateString: string): string {
+// Date formatting utilities with language support
+export function formatDate(dateString: string, language: Language = 'en'): string {
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', {
+  const locale = language === 'es' ? 'es-US' : 'en-US'
+  
+  return date.toLocaleDateString(locale, {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -18,24 +20,28 @@ export function formatDate(dateString: string): string {
   })
 }
 
-export function formatTime(timeString: string): string {
+export function formatTime(timeString: string, language: Language = 'en'): string {
   const [hours, minutes] = timeString.split(':')
   const date = new Date()
   date.setHours(parseInt(hours), parseInt(minutes))
-  return date.toLocaleTimeString('en-US', {
+  const locale = language === 'es' ? 'es-US' : 'en-US'
+  
+  return date.toLocaleTimeString(locale, {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true
   })
 }
 
-// NEW: Format time range for display
-export function formatTimeRange(startTime: string, endTime: string): string {
+// Format time range for display with language support
+export function formatTimeRange(startTime: string, endTime: string, language: Language = 'en'): string {
+  const locale = language === 'es' ? 'es-US' : 'en-US'
+  
   const formatSingleTime = (timeString: string) => {
     const [hours, minutes] = timeString.split(':');
     const date = new Date();
     date.setHours(parseInt(hours), parseInt(minutes));
-    return date.toLocaleTimeString('en-US', {
+    return date.toLocaleTimeString(locale, {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true
@@ -130,8 +136,8 @@ export function isEventUpcoming(eventDate: string): boolean {
 // Convert Event to EventDisplay with computed properties - UPDATED
 export function enrichEventForDisplay(event: Event): EventDisplay {
   const isUpcoming = isEventUpcoming(event.date)
-  const displayDate = formatDate(event.date)
-  const displayTime = formatTimeRange(event.startTime, event.endTime)  // UPDATED
+  const displayDate = formatDate(event.date, event.language)
+  const displayTime = formatTimeRange(event.startTime, event.endTime, event.language)
   const prefillUrl = generatePrefillUrl(event)
   
   return {
@@ -178,11 +184,12 @@ export function formatDateForSheets(date: Date): string {
 export function createEventFromForm(formData: {
   title: string
   date: string
-  startTime: string      // RENAMED from 'time'
-  endTime: string        // NEW
+  startTime: string      
+  endTime: string        
   location: string
-  address?: string       // NEW
+  address?: string       
   trainingType: TrainingType
+  language: Language     // NEW
   googleFormBaseUrl: string
   dateEntryId: string
   locationEntryId: string
@@ -195,11 +202,12 @@ export function createEventFromForm(formData: {
     id: generateEventId(),
     title: formData.title,
     date: formData.date,
-    startTime: formData.startTime,      // RENAMED
-    endTime: formData.endTime,          // NEW
+    startTime: formData.startTime,      
+    endTime: formData.endTime,          
     location: formData.location,
-    address: formData.address,          // NEW
+    address: formData.address,          
     trainingType: formData.trainingType,
+    language: formData.language,        // NEW
     googleFormBaseUrl: formData.googleFormBaseUrl,
     dateEntryId: formData.dateEntryId,
     locationEntryId: formData.locationEntryId,
