@@ -2,38 +2,26 @@
 
 import { EventCard } from "@/components/event-card";
 import { TrainingFilter } from "@/components/training-filter";
+import { LogoHeader } from "@/components/ui/logo-header";
+import { LanguageToggle } from "@/components/ui/language-toggle";
 import { sampleEvents } from "@/lib/sample-data";
 import { useState } from "react";
 import { Search } from "lucide-react";
 
 type FilterOption = "all" | "MHFA" | "QPR";
 
-// McCall header logo component
-function McCallHeaderLogo() {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="w-12 h-12 relative">
-        <div className="absolute inset-0 rounded-full overflow-hidden">
-          <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-[#bcd63e]"></div>
-          <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-[#003057]"></div>
-          <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-[#fbac40]"></div>
-          <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 bg-white transform rotate-45 origin-center"></div>
-        </div>
-      </div>
-      <div>
-        <h1 className="text-2xl font-bold text-[#003057]">McCall</h1>
-        <p className="text-sm text-[#003057] -mt-1">PREVENTION SERVICES</p>
-      </div>
-    </div>
-  );
-}
-
 export default function Home() {
   const [activeFilter, setActiveFilter] = useState<FilterOption>("all");
+  const [currentLanguage, setCurrentLanguage] = useState<"en" | "es">("en");
 
   const filteredEvents = activeFilter === "all" 
     ? sampleEvents 
     : sampleEvents.filter(event => event.trainingType === activeFilter);
+
+  const handleLanguageChange = (language: "en" | "es") => {
+    setCurrentLanguage(language);
+    // TODO: Implement language switching logic for content
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f5f2e8] to-[#f4eee1]">
@@ -41,12 +29,8 @@ export default function Home() {
       <header className="bg-[#003057] text-white">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="bg-white rounded-full p-2">
-              <McCallHeaderLogo />
-            </div>
-            <button className="bg-[#80bc00] hover:bg-[#6ca000] px-4 py-2 rounded text-white font-semibold transition-colors">
-              EN | ES
-            </button>
+            <LogoHeader />
+            <LanguageToggle onLanguageChange={handleLanguageChange} />
           </div>
         </div>
       </header>

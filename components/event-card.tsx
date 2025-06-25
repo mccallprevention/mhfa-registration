@@ -3,23 +3,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Event } from "@/lib/types";
 import { formatDate, formatTimeRange, generatePrefillUrl } from "@/lib/utils";
 import { MapPin, Clock } from "lucide-react";
+import Image from "next/image";
 
 interface EventCardProps {
   event: Event;
-}
-
-// McCall logo component matching their brand
-function McCallLogo({ className = "w-8 h-8" }: { className?: string }) {
-  return (
-    <div className={`${className} relative`}>
-      <div className="absolute inset-0 rounded-full overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-[#bcd63e]"></div>
-        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-[#003057]"></div>
-        <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-[#fbac40]"></div>
-        <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 bg-white transform rotate-45 origin-center"></div>
-      </div>
-    </div>
-  );
 }
 
 export function EventCard({ event }: EventCardProps) {
@@ -27,17 +14,19 @@ export function EventCard({ event }: EventCardProps) {
   
   return (
     <Card className="w-full border-0 shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
-      {/* Top accent bar matching McCall style */}
-      <div className={`h-2 ${
-        event.trainingType === "MHFA" 
-          ? "bg-mccall-gradient-blue" 
-          : "bg-mccall-gradient-green"
-      }`} />
+      {/* Top accent bar - always blue */}
+      <div className="h-2 bg-mccall-gradient-blue" />
       
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 flex-1">
-            <McCallLogo className="w-10 h-10 flex-shrink-0 mt-1" />
+            <Image 
+              src="/img_assets/McCall Icon Full Color.svg"
+              alt="McCall Behavioral Health Network"
+              width={40}
+              height={40}
+              className="flex-shrink-0 mt-1"
+            />
             <div className="flex-1">
               <CardTitle className="text-xl text-mccall-navy mb-1">{event.title}</CardTitle>
               <CardDescription className="text-base">
