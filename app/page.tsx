@@ -13,14 +13,21 @@ export default function Home() {
   const [activeFilter, setActiveFilter] = useState<FilterOption>("all");
   const [currentLanguage, setCurrentLanguage] = useState<"en" | "es">("en");
 
-  const filteredEvents = activeFilter === "all" 
-    ? sampleEvents 
-    : sampleEvents.filter(event => event.trainingType === activeFilter);
+  // --- START: MODIFIED CODE ---
+
+  const filteredEvents = sampleEvents
+    // 1. First, filter the events to match the current language.
+    .filter(event => event.language === currentLanguage)
+    // 2. Then, apply the training type filter (or show all if "all" is selected).
+    .filter(event => activeFilter === "all" || event.trainingType === activeFilter);
+    
+  // --- END: MODIFIED CODE ---
 
   const handleLanguageChange = (language: "en" | "es") => {
     setCurrentLanguage(language);
-    // TODO: Implement language switching logic for content
+    // The filtering logic now automatically handles the change, no TODO needed here.
   };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f5f2e8] to-[#f4eee1]">
