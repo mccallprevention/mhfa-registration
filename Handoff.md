@@ -11,7 +11,7 @@
 > 3. Updates should detail architectural decisions, particularly those affecting file structure, shared utilities, or core business logic, to facilitate efficient onboarding.  
 > 4. The existing structure of this document should be preserved. Revisions should be additive unless a fundamental change in the project's strategic direction necessitates a structural overhaul.
 
-*Last Updated: June 25, 2025*
+*Last Updated: June 26, 2025*
 
 ## 🧩 Project Scope & Goals
 
@@ -23,7 +23,7 @@ Build a low-maintenance, low-cost, bilingual website that can:
   - Let users register via language-specific, prefilled Google Forms.
   - Automatically send confirmation and reminder emails (future phase).
   - Give admins easy control over events and messaging (future phase).
-  - Run entirely on free-tier services (Vercel, Make, Google).
+  - Run entirely on free-tier services (Vercel, Redis Cloud, Make, Google).
 
 ## 🏗️ Architecture Overview
 
@@ -33,9 +33,9 @@ Build a low-maintenance, low-cost, bilingual website that can:
   - **Current Features:** A fully branded, bilingual, and responsive UI. Includes dynamic event filtering by language (EN/ES) and training type (MHFA/QPR).
   - **Performance:** Designed for fast loads, with future potential for ISR (Incremental Static Regeneration) on Vercel.
 
-### 2\. 🔐 Backend – Admin Dashboard (Future Phase)
+### 2\. 🔐 Backend – Admin Dashboard (In Progress)
 
-  - **Stack:** Next.js API routes.
+  - **Stack:** Next.js API routes with Redis Cloud database.
   - **Features:** An auth-protected `/admin` page for full CRUD (Create, Read, Update, Delete) of events.
   - **Data Model:** Immutable Event ID, Title, Date, Time, Location, Language, Training Type, Google Form links.
 
@@ -51,20 +51,24 @@ Build a low-maintenance, low-cost, bilingual website that can:
   - **Reminder:** A daily job will check for upcoming events and email registrants.
   - **Calendar:** Will generate `.ics` attachments for "Add to calendar" functionality.
 
-### 5\. 🗄️ Data Storage (Future Phase)
+### 5\. 🗄️ Data Storage (**IMPLEMENTED**)
 
-  - **Registrations:** Google Sheets will be the database for user registrations.
-  - **Events:** Event data will be moved from the current `sample-data.ts` file to a database (JSON file, Vercel KV, or Google Sheets) accessed via API.
+  - **Events Database:** **Redis Cloud** via Vercel Storage (30MB free tier).
+  - **Connection:** Standard Redis protocol via `REDIS_URL` environment variable.
+  - **Client:** Uses `redis` npm package with `RedisClientType` for type safety.
+  - **Registrations:** Google Sheets will be the database for user registrations (future phase).
   - **Backups:** Plan includes weekly CSV exports of registration data.
 
 -----
 
-## ✅ CURRENT STATUS: Phase 2 Complete + Architecture Refactor
+## ✅ CURRENT STATUS: Phase 3 In Progress - Database Layer Complete
 
 ### 🏆 **Major Milestones Achieved:**
 
 1. **Interactive Bilingual Event Filtering** - The public-facing front-end is feature-complete.
 2. **Architecture Refactoring** - Codebase has been refactored for maintainability and scalability.
+3. **Database Infrastructure** - Redis Cloud database deployed and connected.
+4. **API Foundation** - Database client implemented with full CRUD operations.
 
 **✅ COMPLETED:**
 
@@ -75,14 +79,20 @@ Build a low-maintenance, low-cost, bilingual website that can:
   - **Step E:** Full bilingual support, with distinct English and Spanish events and UI text.
   - **Step F:** **Core filtering logic implemented:** Events are now correctly filtered first by language, then by training type.
   - **Step G:** All known TypeScript, ESLint, and React Hydration errors have been resolved.
-  - **Step H (NEW):** **Architecture refactoring completed:**
+  - **Step H:** **Architecture refactoring completed:**
     - Fixed critical type duplication issue
     - Implemented proper i18n translation system
     - Extracted all constants and configuration
     - Created reusable custom hooks
     - Reduced sample data file from 600+ to ~100 lines
+  - **Step I (NEW):** **Database infrastructure implemented:**
+    - Redis Cloud database via Vercel Storage (30MB free)
+    - Type-safe database client with singleton connection pattern
+    - Full CRUD operations for events
+    - Database seeding functionality
+    - Production-ready API routes with proper runtime configuration
 
-**🎯 NEXT IMMEDIATE STEP:** Phase 3 - Admin Dashboard & API Routes
+**🎯 NEXT IMMEDIATE STEP:** Complete Phase 3 - API Routes & Admin Authentication
 
 -----
 
@@ -103,6 +113,40 @@ Build a low-maintenance, low-cost, bilingual website that can:
 ```
 
 **❗ Key Learning:** Without `baseUrl`, you get "is not a module" errors. All imports use `@/lib/...` pattern.
+
+### **Redis API Routes Configuration (CRITICAL)**
+
+**🚨 ESSENTIAL: Every API route that uses Redis MUST include this as the first export:**
+
+```typescript
+export const runtime = 'nodejs' // Required for Redis client
+```
+
+**Why:** The `redis` npm package uses Node.js APIs that aren't available in the Edge runtime. Without this, routes will work locally but fail in production with "module not found" errors.
+
+### **Environment Variables (PRODUCTION)**
+
+**Required in Vercel:**
+```env
+REDIS_URL=redis://default:password@host:port  # Auto-set by Vercel Storage
+NEXTAUTH_SECRET=your_generated_secret
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your_secure_password
+```
+
+**Required in `.env.local`:**
+```env
+# Redis Cloud (copy from Vercel environment variables)
+REDIS_URL=redis://default:password@host:port
+
+# NextAuth (generate with: openssl rand -base64 32)
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_generated_secret_here
+
+# Admin Credentials
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your_chosen_password_here
+```
 
 ### **Browser Extension Hydration Warnings**
 
@@ -162,29 +206,68 @@ npm run lint     # Runs the linter to check for code quality issues
 ```
 📁 mhfa-registration/
 ├── app/
-│   ├── globals.css         # 🎨 CRITICAL: McCall branding CSS variables
-│   ├── layout.tsx          # ✅ Root layout with hydration warning suppression
-│   └── page.tsx            # 🧠 The "brain": manages state & filtering
+│   ├── api/
+│   │   ├── test-db/
+│   │   │   └── route.ts         # ✅ NEW: Database connection test endpoint
+│   │   └── events/              # 🔄 IN PROGRESS: Main events API
+│   │       ├── route.ts         # GET/POST endpoints for events
+│   │       └── [id]/
+│   │           └── route.ts     # GET/PUT/DELETE for individual events
+│   ├── globals.css              # 🎨 CRITICAL: McCall branding CSS variables
+│   ├── layout.tsx               # ✅ Root layout with hydration warning suppression
+│   └── page.tsx                 # 🧠 The "brain": manages state & filtering
 ├── components/
 │   ├── ui/
-│   │   ├── button.tsx          # Base button component
-│   │   ├── card.tsx            # Base card components
-│   │   ├── logo-header.tsx     # ✅ Reusable McCall Logo component
-│   │   └── language-toggle.tsx # ✅ Interactive, responsive language toggle
-│   ├── event-card.tsx      # Displays a single event card
-│   └── training-filter.tsx # MHFA/QPR/All filter buttons
+│   │   ├── button.tsx           # Base button component
+│   │   ├── card.tsx             # Base card components
+│   │   ├── logo-header.tsx      # ✅ Reusable McCall Logo component
+│   │   └── language-toggle.tsx  # ✅ Interactive, responsive language toggle
+│   ├── event-card.tsx           # Displays a single event card
+│   └── training-filter.tsx      # MHFA/QPR/All filter buttons
 └── lib/
-    ├── constants.ts        # ✅ NEW: Centralized configuration
-    ├── types.ts            # ✅ Defines the shape of Event data (w/ language)
-    ├── utils.ts            # ✅ Language-aware utility functions (FIXED)
-    ├── sample-data.ts      # ✅ DEPRECATED: Use sample-data-generator.ts
-    ├── sample-data-generator.ts # ✅ NEW: Dynamic sample data generation
+    ├── db/                      # ✅ NEW: Database layer
+    │   ├── redis-client.ts      # ✅ NEW: Type-safe Redis client with CRUD operations
+    │   └── seed.ts              # ✅ NEW: Database seeding utilities
+    ├── constants.ts             # ✅ Centralized configuration
+    ├── types.ts                 # ✅ Defines the shape of Event data (w/ language)
+    ├── utils.ts                 # ✅ Language-aware utility functions (FIXED)
+    ├── sample-data.ts           # ✅ DEPRECATED: Use sample-data-generator.ts
+    ├── sample-data-generator.ts # ✅ Dynamic sample data generation
     ├── hooks/
-    │   └── useEventFilter.ts    # ✅ NEW: Reusable filtering logic
+    │   └── useEventFilter.ts    # ✅ Reusable filtering logic
     └── i18n/
-        ├── translations.ts      # ✅ NEW: Centralized translations
-        └── useTranslation.ts    # ✅ NEW: Translation hook
+        ├── translations.ts      # ✅ Centralized translations
+        └── useTranslation.ts    # ✅ Translation hook
 ```
+
+### **🗄️ Database Layer (NEW)**
+
+**Database Client (`lib/db/redis-client.ts`):**
+- Singleton Redis connection pattern for efficiency
+- Type-safe operations using `RedisClientType`
+- Full CRUD operations: `getAllEvents()`, `createEvent()`, `updateEvent()`, `deleteEvent()`
+- Auto-seeding functionality for development
+- Production-ready error handling
+
+**Key Functions Available:**
+```typescript
+// READ operations
+EventDatabase.getAllEvents(): Promise<Event[]>
+EventDatabase.getEventById(id: string): Promise<Event | null>
+
+// WRITE operations  
+EventDatabase.createEvent(data: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>): Promise<Event>
+EventDatabase.updateEvent(id: string, updates: Partial<Event>): Promise<Event | null>
+EventDatabase.deleteEvent(id: string): Promise<boolean>
+
+// UTILITY operations
+EventDatabase.seedDatabase(initialEvents: Event[]): Promise<void>
+```
+
+**Database Seeding (`lib/db/seed.ts`):**
+- `seedDatabaseIfEmpty()`: Automatically populates database with sample data on first run
+- Integrates with existing `generateSampleEvents()` utility
+- Safe to run multiple times (checks for existing data)
 
 ### **🧩 Type System (lib/types.ts)**
 
@@ -233,7 +316,7 @@ export interface EventDisplay extends Event {
 
 **✅ FIXED** - No longer contains duplicate type definitions. All utilities are type-safe and properly import from `@/lib/types`.
 
-### **🌐 i18n Translation System (NEW)**
+### **🌐 i18n Translation System**
 
 **✅ COMPLETE** - Professional translation system replacing inline ternary operators.
 
@@ -245,7 +328,7 @@ const { t } = useTranslation(currentLanguage);
 <h1>{t('hero.title')}</h1>
 ```
 
-### **🎯 Custom Hooks (NEW)**
+### **🎯 Custom Hooks**
 
 **✅ useEventFilter Hook** - Encapsulates all filtering logic with useful computed properties:
 
@@ -260,7 +343,7 @@ const {
   upcomingEventCounts,
   hasEvents,
   hasUpcomingEvents
-} = useEventFilter(sampleEvents);
+} = useEventFilter(events); // Now accepts events from API
 ```
 
 -----
@@ -272,7 +355,7 @@ const {
 The central challenge was displaying events correctly based on two criteria. The solution in `app/page.tsx` is a **chained filter**, which is the most important piece of logic on the page.
 
 ```typescript
-const filteredEvents = sampleEvents
+const filteredEvents = events // Now from API, not sample data
   .filter(event => event.language === currentLanguage) // 1. Filter by language FIRST
   .filter(event => activeFilter === "all" || event.trainingType === activeFilter); // 2. Then filter by type
 ```
@@ -295,43 +378,148 @@ const filteredEvents = sampleEvents
   - **`components/`** is for specific, composite components that solve an app problem (e.g., an event card).
   - **`lib/hooks/`** contains custom React hooks for reusable logic.
   - **`lib/i18n/`** contains all internationalization/translation files.
+  - **`lib/db/`** contains all database-related functionality.
 
 ### **5. HTML Semantics & Hydration Errors**
 
   - React hydration errors from browser extensions are suppressed with `suppressHydrationWarning` on both `<html>` and `<body>` tags.
   - Previous hydration error in `event-card.tsx` was fixed by replacing invalid `<p>` tag nesting.
 
-### **6. Architecture Refactoring (NEW)**
+### **6. Architecture Refactoring**
 
   - **Type Safety:** Fixed critical type duplication bug where `utils.ts` contained full copy of all types.
   - **Maintainability:** Sample data reduced from 600+ lines to ~100 lines with generator function.
   - **Scalability:** All constants, translations, and reusable logic extracted to dedicated modules.
   - **Import Pattern:** All imports now use `@/lib/...` pattern for consistency and reliability.
 
+### **7. Database Architecture (NEW)**
+
+  - **Redis Cloud Choice:** Selected over Upstash or old Vercel KV for better reliability and performance.
+  - **Singleton Pattern:** Database connection reuses single client instance for efficiency.
+  - **Type Safety:** Full TypeScript integration with `RedisClientType` from `redis` package.
+  - **Error Handling:** Comprehensive try/catch blocks with fallback behaviors.
+  - **Production Ready:** Proper runtime configuration prevents deployment failures.
+
+-----
+
+## 🧠 Notes for AI Coding Assistance
+
+### **Critical Information for AI Assistants**
+
+**If your training data cutoff is before January 31, 2025, you may have outdated information about:**
+
+#### **1. Vercel Database Options (MAJOR CONFUSION SOURCE)**
+
+**❌ OUTDATED (Pre-2025):**
+- Vercel KV was a direct Vercel service
+- Used `@vercel/kv` package with `KV_REST_API_URL` and `KV_REST_API_TOKEN`
+- Setup through Vercel Storage tab with "KV" option
+
+**✅ CURRENT (2025):**
+- Vercel Storage now uses **Redis Cloud** as the provider
+- Uses standard `redis` package with single `REDIS_URL` environment variable
+- Setup through Vercel Storage → "Create Database" → "Redis" (powered by Redis Cloud)
+- **30MB free tier** (not the 25MB often mentioned in older guides)
+
+#### **2. API Routes Runtime Configuration**
+
+**❌ OUTDATED:** 
+- API routes automatically work with all packages
+- Edge runtime is sufficient for most use cases
+
+**✅ CURRENT REQUIREMENT:**
+- Any API route using `redis` package **MUST** include: `export const runtime = 'nodejs'`
+- This must be the **first export** in the file
+- Without this, routes work locally but fail in production with "module not found" errors
+- This is due to Redis requiring Node.js APIs not available in Edge runtime
+
+#### **3. Redis Client Patterns**
+
+**❌ OUTDATED:**
+- Using `any` types for Redis clients
+- Direct connection in each function
+- REST-based clients for Vercel deployments
+
+**✅ CURRENT BEST PRACTICE:**
+- Import `RedisClientType` from `redis` for proper typing
+- Singleton connection pattern to reuse client instance
+- Standard Redis protocol (TCP) not REST
+- Proper connection management with error handlers
+
+#### **4. Package Dependencies**
+
+**❌ OUTDATED GUIDES SUGGEST:**
+```bash
+npm install @vercel/kv        # Wrong for current setup
+npm install @upstash/redis    # Wrong for Redis Cloud
+```
+
+**✅ CORRECT FOR REDIS CLOUD:**
+```bash
+npm install redis             # Standard Redis client
+npm install next-auth         # For authentication
+npm install --save-dev @types/node @types/next-auth
+```
+
+#### **5. Environment Variable Patterns**
+
+**❌ OUTDATED:**
+```env
+KV_REST_API_URL=...           # Old Vercel KV
+KV_REST_API_TOKEN=...
+UPSTASH_REDIS_REST_URL=...    # Upstash specific
+UPSTASH_REDIS_REST_TOKEN=...
+```
+
+**✅ CURRENT:**
+```env
+REDIS_URL=redis://default:password@host:port  # Single Redis Cloud URL
+```
+
+### **Key Debugging Hints:**
+
+1. **"Module not found" errors in production:** Add `export const runtime = 'nodejs'` to API routes
+2. **Connection refused locally:** Check that `REDIS_URL` is set in `.env.local`
+3. **Works locally, fails in production:** Usually missing runtime configuration
+4. **TypeScript errors with Redis:** Use `RedisClientType` instead of `any`
+
+### **Reliable Information Sources (as of 2025):**
+- Vercel Storage documentation (not older KV docs)
+- Redis Cloud official documentation
+- Next.js App Router API routes documentation
+- This handoff document (maintained current)
+
 -----
 
 ## 📋 Next Steps for Development
 
-### **🎯 Phase 3: Admin Dashboard (NEXT)**
+### **🎯 Phase 3: Admin Dashboard (IN PROGRESS)**
 
-The codebase is now properly structured for building the backend and admin interface:
+**✅ COMPLETED:**
+- Database infrastructure and client
+- Test endpoints and connection verification
+- Production deployment with proper configuration
 
-1. **Authentication Setup:** 
-   - Create and protect an `/admin` route
-   - Consider using NextAuth.js or Clerk for authentication
+**🔄 CURRENT TASKS:**
+1. **API Routes Implementation:**
+   - Complete `/api/events` GET/POST endpoints
+   - Complete `/api/events/[id]` GET/PUT/DELETE endpoints
+   - Add proper validation and error handling
 
-2. **API Routes:** 
-   - Build `/api/events` for GET, POST, PUT, DELETE
-   - Leverage existing types and utilities from refactoring
+2. **Frontend API Integration:**
+   - Update main page to fetch from `/api/events` instead of sample data
+   - Add loading states and error handling
+   - Test auto-seeding functionality
 
-3. **Data Persistence:** 
-   - Move from `sample-data-generator.ts` to real database
-   - Consider Vercel KV, Supabase, or Google Sheets as backend
+3. **Authentication Setup:**
+   - Implement NextAuth.js configuration
+   - Create and protect `/admin` route
+   - Add login/logout functionality
 
-4. **Event Management UI:** 
-   - Build admin UI using existing components
-   - Utilize `useEventFilter` hook for admin event viewing
-   - Reuse form validation from `createEventFromForm` utility
+4. **Admin UI Components:**
+   - Build event management interface
+   - Create forms for adding/editing events
+   - Implement delete confirmations
 
 ### **🎯 Phase 4: Email Automation**
 
@@ -349,15 +537,18 @@ The codebase is now properly structured for building the backend and admin inter
 
 -----
 
-## 🎉 Ready for Phase 3!
+## 🎉 Current Status Summary
 
-The codebase has been successfully refactored with:
-- ✅ Clean architecture
+The codebase has been successfully evolved through Phase 3 foundation with:
+- ✅ Clean architecture maintained
 - ✅ Type safety throughout
-- ✅ Reusable utilities and hooks
+- ✅ Production-ready database layer
+- ✅ Verified Redis Cloud connectivity
+- ✅ API foundation implemented
 - ✅ Professional i18n system
 - ✅ Centralized configuration
-- ✅ No TypeScript or ESLint errors
+- ✅ Zero TypeScript or ESLint errors
 - ✅ Browser extension compatibility
+- ✅ Scalable database patterns
 
-The foundation is solid and ready for the admin dashboard implementation!
+**The foundation is rock-solid and ready for the final API routes and admin interface implementation!**
