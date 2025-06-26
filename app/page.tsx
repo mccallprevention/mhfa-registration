@@ -4,36 +4,107 @@ import { EventCard } from "@/components/event-card";
 import { TrainingFilter } from "@/components/training-filter";
 import { LogoHeader } from "@/components/ui/logo-header";
 import { LanguageToggle } from "@/components/ui/language-toggle";
-import { sampleEvents } from "@/lib/sample-data";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import type { Event } from '@/lib/types'
 
 type FilterOption = "all" | "MHFA" | "QPR";
 
 export default function Home() {
+  // NEW: API data loading
+  const [events, setEvents] = useState<Event[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Keep your existing state
   const [activeFilter, setActiveFilter] = useState<FilterOption>("all");
   const [currentLanguage, setCurrentLanguage] = useState<"en" | "es">("en");
 
+  // NEW: Fetch events from API
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        setLoading(true)
+        const response = await fetch('/api/events')
+        if (!response.ok) {
+          throw new Error('Failed to fetch events')
+        }
+        const data = await response.json()
+        setEvents(data.events || [])
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load events')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchEvents()
+  }, [])
 
-  const filteredEvents = sampleEvents
-    // 1. First, filter the events to match the current language.
+  // Keep your existing filtering logic - just change sampleEvents to events
+  const filteredEvents = events
     .filter(event => event.language === currentLanguage)
-    // 2. Then, apply the training type filter (or show all if "all" is selected).
     .filter(event => activeFilter === "all" || event.trainingType === activeFilter);
-    
 
-
+  // Keep your existing handler
   const handleLanguageChange = (language: "en" | "es") => {
     setCurrentLanguage(language);
-    // The filtering logic now automatically handles the change, no TODO needed here.
   };
 
+  // NEW: Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#f5f2e8] to-[#f4eee1]">
+        <header className="bg-[#003057] text-white">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <LogoHeader className="mr-4 sm:mr-6" />   
+              <LanguageToggle onLanguageChange={handleLanguageChange} />
+            </div>
+          </div>
+        </header>
+        <div className="bg-gradient-to-r from-[#003057] to-[#054a76] text-white py-12">
+          <div className="container mx-auto px-4 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+            <p>Loading events...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
+  // NEW: Error state  
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#f5f2e8] to-[#f4eee1]">
+        <header className="bg-[#003057] text-white">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <LogoHeader className="mr-4 sm:mr-6" />   
+              <LanguageToggle onLanguageChange={handleLanguageChange} />
+            </div>
+          </div>
+        </header>
+        <div className="bg-gradient-to-r from-[#003057] to-[#054a76] text-white py-12">
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="text-2xl font-bold mb-4">Error Loading Events</h1>
+            <p>{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 bg-white text-[#003057] px-4 py-2 rounded hover:bg-gray-100"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Keep your EXACT existing return structure
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f5f2e8] to-[#f4eee1]">
       {/* Header with McCall branding */}
       <header className="bg-[#003057] text-white">
         <div className="container mx-auto px-4 py-4">
-          {/* NOTE: the only change is the extra mr-4 on LogoHeader */}
           <div className="flex items-center justify-between">
             <LogoHeader className="mr-4 sm:mr-6" />   
             <LanguageToggle onLanguageChange={handleLanguageChange} />
