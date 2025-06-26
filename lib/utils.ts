@@ -6,9 +6,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// Date formatting utilities with language support
+// Helper function to parse YYYY-MM-DD as local time (not UTC)
+function parseLocalDate(dateString: string): Date {
+  const [year, month, day] = dateString.split('-').map(Number)
+  return new Date(year, month - 1, day) // month is 0-based in JS
+}
+
+// Date formatting utilities with language support - FIXED
 export function formatDate(dateString: string, language: Language = 'en'): string {
-  const date = new Date(dateString)
+  const date = parseLocalDate(dateString) // ← Fixed: now uses parseLocalDate
   const locale = language === 'es' ? 'es-US' : 'en-US'
  
   return date.toLocaleDateString(locale, {
@@ -119,10 +125,10 @@ export function validateGoogleFormUrlBasic(url: string): UrlValidationResult {
   }
 }
 
-// Event validation utilities
+// Event validation utilities - FIXED
 export function isEventUpcoming(eventDate: string): boolean {
   const today = new Date()
-  const eventDateObj = new Date(eventDate)
+  const eventDateObj = parseLocalDate(eventDate) // ← Fixed: now uses parseLocalDate
  
   // For MVP, simple date comparison works
   // TODO: Add timezone support in future version
@@ -153,11 +159,11 @@ export function generateEventId(): string {
   return `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 }
 
-// Utility to sort events by date
+// Utility to sort events by date - FIXED
 export function sortEventsByDate(events: Event[], ascending: boolean = true): Event[] {
   return [...events].sort((a, b) => {
-    const dateA = new Date(a.date)
-    const dateB = new Date(b.date)
+    const dateA = parseLocalDate(a.date) // ← Fixed: now uses parseLocalDate
+    const dateB = parseLocalDate(b.date) // ← Fixed: now uses parseLocalDate
     return ascending ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime()
   })
 }
