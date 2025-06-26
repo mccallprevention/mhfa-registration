@@ -1,224 +1,101 @@
-import { type ClassValue, clsx } from "clsx"
+// lib/utils.ts
+import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { Event, EventDisplay, UrlValidationResult, Language, TrainingType } from "./types"
+import type { Event, EventDisplay } from "@/lib/types"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// Helper function to parse YYYY-MM-DD as local time (not UTC)
-function parseLocalDate(dateString: string): Date {
-  const [year, month, day] = dateString.split('-').map(Number)
-  return new Date(year, month - 1, day) // month is 0-based in JS
-}
-
-// Date formatting utilities with language support - FIXED
-export function formatDate(dateString: string, language: Language = 'en'): string {
-  const date = parseLocalDate(dateString) // ← Fixed: now uses parseLocalDate
-  const locale = language === 'es' ? 'es-US' : 'en-US'
- 
-  return date.toLocaleDateString(locale, {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
-
-export function formatTime(timeString: string, language: Language = 'en'): string {
-  const [hours, minutes] = timeString.split(':')
-  const date = new Date()
-  date.setHours(parseInt(hours), parseInt(minutes))
-  const locale = language === 'es' ? 'es-US' : 'en-US'
- 
-  return date.toLocaleTimeString(locale, {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  })
-}
-
-// Format time range for display with language support
-export function formatTimeRange(startTime: string, endTime: string, language: Language = 'en'): string {
-  const locale = language === 'es' ? 'es-US' : 'en-US'
- 
-  const formatSingleTime = (timeString: string) => {
-    const [hours, minutes] = timeString.split(':');
-    const date = new Date();
-    date.setHours(parseInt(hours), parseInt(minutes));
-    return date.toLocaleTimeString(locale, {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
-  };
- 
-  return `${formatSingleTime(startTime)} - ${formatSingleTime(endTime)}`;
-}
-
-// Google Forms URL utilities - Updated for MHFA project requirements
-export function generatePrefillUrl(event: Event): string {
-  const params = new URLSearchParams({
-    usp: 'pp_url',
-    [event.dateEntryId]: event.date,
-    [event.locationEntryId]: event.location
-  });
- 
-  // URLSearchParams encodes spaces as '+', but Google Forms needs '%20'
-  const paramString = params.toString().replace(/\+/g, '%20');
- 
-  return `${event.googleFormBaseUrl}?${paramString}`;
-}
-
-// URL validation for Google Forms
-export async function validateGoogleFormUrl(url: string): Promise<UrlValidationResult> {
+/**
+ * Format a date string (YYYY-MM-DD) into a readable format
+ */
+export function formatDate(dateString: string): string {
   try {
-    const response = await fetch(url, {
-      method: 'HEAD', // Use HEAD to avoid downloading full content
-      mode: 'no-cors', // Handle CORS issues with Google Forms
+    const date = new Date(dateString + 'T00:00:00') // Add time to avoid timezone issues
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric', 
+      month: 'long',
+      day: 'numeric'
     })
-   
-    // Google Forms typically return 200 for valid forms or 302 for redirects
-    const isValid = response.status === 200 || response.status === 302
-   
-    return {
-      isValid,
-      status: response.status,
-      url
-    }
-  } catch (error) {
-    return {
-      isValid: false,
-      error: error instanceof Error ? error.message : 'Unknown validation error',
-      url
-    }
-  }
-}
-
-// Alternative validation method that works better with Google Forms CORS
-export function validateGoogleFormUrlBasic(url: string): UrlValidationResult {
-  try {
-    const urlObj = new URL(url)
-   
-    // Basic validation: should be a Google Forms URL
-    const isGoogleForm = urlObj.hostname === 'docs.google.com' &&
-                          urlObj.pathname.includes('/forms/')
-   
-    if (!isGoogleForm) {
-      return {
-        isValid: false,
-        error: 'URL must be a Google Forms link',
-        url
-      }
-    }
-   
-    return {
-      isValid: true,
-      url
-    }
   } catch {
-    return {
-      isValid: false,
-      error: 'Invalid URL format',
-      url
-    }
+    return dateString // Return original if parsing fails
   }
 }
 
-// Event validation utilities - FIXED
-export function isEventUpcoming(eventDate: string): boolean {
-  const today = new Date()
-  const eventDateObj = parseLocalDate(eventDate) // ← Fixed: now uses parseLocalDate
- 
-  // For MVP, simple date comparison works
-  // TODO: Add timezone support in future version
-  today.setHours(0, 0, 0, 0) // Reset time to start of day
-  eventDateObj.setHours(0, 0, 0, 0)
- 
-  return eventDateObj >= today
+/**
+ * Format time range from start and end times (HH:MM format)
+ */
+export function formatTimeRange(startTime: string, endTime: string): string {
+  try {
+    const formatTime = (time: string) => {
+      const [hours, minutes] = time.split(':')
+      const date = new Date()
+      date.setHours(parseInt(hours), parseInt(minutes))
+      return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      })
+    }
+    
+    return `${formatTime(startTime)} - ${formatTime(endTime)}`
+  } catch {
+    return `${startTime} - ${endTime}` // Return original if parsing fails
+  }
 }
 
-// Convert Event to EventDisplay with computed properties - UPDATED
+/**
+ * Generate a pre-filled Google Form URL for an event
+ */
+export function generatePrefillUrl(event: Event): string {
+  if (!event.googleFormBaseUrl) {
+    return '#' // Return empty anchor if no form URL
+  }
+  
+  const url = new URL(event.googleFormBaseUrl)
+  
+  // Add pre-filled entries if they exist
+  if (event.dateEntryId) {
+    url.searchParams.set(event.dateEntryId, formatDate(event.date))
+  }
+  
+  if (event.locationEntryId && event.location) {
+    const locationText = event.address 
+      ? `${event.location}, ${event.address}`
+      : event.location
+    url.searchParams.set(event.locationEntryId, locationText)
+  }
+  
+  return url.toString()
+}
+
+/**
+ * Enrich event data with additional display properties
+ */
 export function enrichEventForDisplay(event: Event): EventDisplay {
-  const isUpcoming = isEventUpcoming(event.date)
-  const displayDate = formatDate(event.date, event.language)
-  const displayTime = formatTimeRange(event.startTime, event.endTime, event.language)
-  const prefillUrl = generatePrefillUrl(event)
- 
+  const now = new Date()
+  const eventDate = new Date(event.date)
+  const isUpcoming = eventDate >= now
+  
   return {
     ...event,
-    isUpcoming,
-    displayDate,
-    displayTime,
-    prefillUrl
+    displayDate: formatDate(event.date),
+    displayTime: formatTimeRange(event.startTime, event.endTime),
+    prefillUrl: generatePrefillUrl(event),
+    isUpcoming
   }
 }
 
-// Generate a unique ID for new events
-export function generateEventId(): string {
-  return `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-}
-
-// Utility to sort events by date - FIXED
+/**
+ * Sort events by date (earliest first by default, or latest first if ascending = false)
+ */
 export function sortEventsByDate(events: Event[], ascending: boolean = true): Event[] {
   return [...events].sort((a, b) => {
-    const dateA = parseLocalDate(a.date) // ← Fixed: now uses parseLocalDate
-    const dateB = parseLocalDate(b.date) // ← Fixed: now uses parseLocalDate
-    return ascending ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime()
+    const dateA = new Date(a.date + 'T' + a.startTime)
+    const dateB = new Date(b.date + 'T' + b.startTime)
+    const diff = dateA.getTime() - dateB.getTime()
+    return ascending ? diff : -diff
   })
-}
-
-// Get events that need reminders (happening tomorrow)
-export function getEventsNeedingReminders(events: Event[]): Event[] {
-  const tomorrow = new Date()
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  const tomorrowString = tomorrow.toISOString().split('T')[0] // yyyy-MM-dd format
- 
-  return events.filter(event =>
-    event.isActive &&
-    event.date === tomorrowString
-  )
-}
-
-// Format date for Google Sheets/Make.com integration
-export function formatDateForSheets(date: Date): string {
-  return date.toISOString()
-}
-
-// Parse event form data and add metadata - UPDATED
-export function createEventFromForm(formData: {
-  title: string
-  date: string
-  startTime: string      
-  endTime: string        
-  location: string
-  address?: string      
-  trainingType: TrainingType
-  language: Language      // NEW
-  googleFormBaseUrl: string
-  dateEntryId: string
-  locationEntryId: string
-  isActive: boolean
-  timeZone?: string
-}): Event {
-  const now = new Date().toISOString()
- 
-  return {
-    id: generateEventId(),
-    title: formData.title,
-    date: formData.date,
-    startTime: formData.startTime,      
-    endTime: formData.endTime,          
-    location: formData.location,
-    address: formData.address,          
-    trainingType: formData.trainingType,
-    language: formData.language,        // NEW
-    googleFormBaseUrl: formData.googleFormBaseUrl,
-    dateEntryId: formData.dateEntryId,
-    locationEntryId: formData.locationEntryId,
-    isActive: formData.isActive,
-    timeZone: formData.timeZone,
-    createdAt: now,
-    updatedAt: now
-  }
 }

@@ -3,6 +3,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LogoHeader } from '@/components/ui/logo-header'
@@ -31,14 +32,14 @@ export default function AdminLogin() {
         }),
       })
 
-      const data = await response.json()
+      const result = await response.json()
 
-      if (data.success) {
+      if (result.success) {
         // Login successful, redirect to admin dashboard
         router.push('/admin')
         router.refresh()
       } else {
-        setError(data.message || 'Login failed')
+        setError(result.message || 'Login failed')
       }
     } catch (err) {
       setError('An error occurred during login')
@@ -65,14 +66,14 @@ export default function AdminLogin() {
             <p className="text-gray-600 text-sm">Enter your credentials to access the admin dashboard</p>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4" suppressHydrationWarning>
               {error && (
                 <div className="p-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">
                   {error}
                 </div>
               )}
               
-              <div>
+              <div suppressHydrationWarning>
                 <label htmlFor="username" className="block text-sm font-medium text-mccall-navy mb-1">
                   Username
                 </label>
@@ -84,10 +85,11 @@ export default function AdminLogin() {
                   onChange={(e) => setCredentials(prev => ({ ...prev, username: e.target.value }))}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mccall-green focus:border-transparent transition-colors"
                   disabled={loading}
+                  suppressHydrationWarning
                 />
               </div>
 
-              <div>
+              <div suppressHydrationWarning>
                 <label htmlFor="password" className="block text-sm font-medium text-mccall-navy mb-1">
                   Password
                 </label>
@@ -99,6 +101,7 @@ export default function AdminLogin() {
                   onChange={(e) => setCredentials(prev => ({ ...prev, password: e.target.value }))}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mccall-green focus:border-transparent transition-colors"
                   disabled={loading}
+                  suppressHydrationWarning
                 />
               </div>
 
@@ -114,12 +117,12 @@ export default function AdminLogin() {
         </Card>
 
         <div className="text-center mt-8">
-          <a 
+          <Link 
             href="/"
             className="text-mccall-navy hover:text-mccall-green transition-colors text-sm font-medium"
           >
             ← Back to Events
-          </a>
+          </Link>
         </div>
       </div>
     </div>
