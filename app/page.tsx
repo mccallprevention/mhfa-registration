@@ -1,3 +1,5 @@
+// Updated app/page.tsx - Frontend with automatic archiving
+
 "use client";
 
 import { EventCard } from "@/components/event-card";
@@ -10,7 +12,7 @@ import type { Event } from '@/lib/types'
 type FilterOption = "all" | "MHFA" | "QPR";
 
 export default function Home() {
-  // NEW: API data loading
+  // API data loading
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -19,11 +21,12 @@ export default function Home() {
   const [activeFilter, setActiveFilter] = useState<FilterOption>("all");
   const [currentLanguage, setCurrentLanguage] = useState<"en" | "es">("en");
 
-  // NEW: Fetch events from API
+  // Fetch only ACTIVE events from API (automatic archiving)
   useEffect(() => {
     async function fetchEvents() {
       try {
         setLoading(true)
+        // No archive parameters = only active events returned
         const response = await fetch('/api/events')
         if (!response.ok) {
           throw new Error('Failed to fetch events')
@@ -39,7 +42,7 @@ export default function Home() {
     fetchEvents()
   }, [])
 
-  // Keep your existing filtering logic - just change sampleEvents to events
+  // Keep your existing filtering logic - events are already filtered to active ones
   const filteredEvents = events
     .filter(event => event.language === currentLanguage)
     .filter(event => activeFilter === "all" || event.trainingType === activeFilter);
@@ -49,7 +52,7 @@ export default function Home() {
     setCurrentLanguage(language);
   };
 
-  // NEW: Loading state
+  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#f5f2e8] to-[#f4eee1]">
@@ -64,14 +67,14 @@ export default function Home() {
         <div className="bg-gradient-to-r from-[#003057] to-[#054a76] text-white py-12">
           <div className="container mx-auto px-4 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-            <p>Loading events...</p>
+            <p>Loading upcoming events...</p>
           </div>
         </div>
       </div>
     )
   }
 
-  // NEW: Error state  
+  // Error state  
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#f5f2e8] to-[#f4eee1]">
@@ -99,7 +102,7 @@ export default function Home() {
     )
   }
 
-  // Keep your EXACT existing return structure
+  // Main page render
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f5f2e8] to-[#f4eee1]">
       {/* Header with McCall branding */}
@@ -146,10 +149,16 @@ export default function Home() {
         {filteredEvents.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg shadow-sm">
             <p className="text-lg text-gray-600">
-              No {activeFilter === "all" ? "" : activeFilter} trainings are currently scheduled.
+              {currentLanguage === "en"
+                ? `No upcoming ${activeFilter === "all" ? "" : activeFilter} trainings are currently scheduled.`
+                : `No hay entrenamientos ${activeFilter === "all" ? "" : activeFilter} próximos programados actualmente.`
+              }
             </p>
             <p className="text-sm text-gray-500 mt-2">
-              Please check back later or try a different filter.
+              {currentLanguage === "en"
+                ? "Please check back later or try a different filter."
+                : "Por favor, vuelva más tarde o pruebe con un filtro diferente."
+              }
             </p>
           </div>
         ) : (

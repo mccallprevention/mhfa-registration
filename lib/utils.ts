@@ -1,4 +1,4 @@
-// lib/utils.ts
+// lib/utils.ts - Complete file with archive functionality
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import type { Event, EventDisplay } from "@/lib/types"
@@ -98,4 +98,48 @@ export function sortEventsByDate(events: Event[], ascending: boolean = true): Ev
     const diff = dateA.getTime() - dateB.getTime()
     return ascending ? diff : -diff
   })
+}
+
+/**
+ * Check if an event date has passed (is archived)
+ */
+export function isEventArchived(eventDate: string): boolean {
+  const today = new Date()
+  const event = new Date(eventDate + 'T23:59:59') // End of event day
+  
+  // Reset today to start of day for fair comparison
+  today.setHours(0, 0, 0, 0)
+  
+  return event < today
+}
+
+/**
+ * Filter events based on archive status
+ */
+export function filterEventsByArchiveStatus(events: Event[], showArchived: boolean = false): Event[] {
+  return events.filter(event => {
+    const archived = isEventArchived(event.date)
+    return showArchived ? archived : !archived
+  })
+}
+
+/**
+ * Get event counts by archive status
+ */
+export function getEventCounts(events: Event[]) {
+  const active = events.filter(event => !isEventArchived(event.date))
+  const archived = events.filter(event => isEventArchived(event.date))
+  
+  return {
+    active: {
+      total: active.length,
+      MHFA: active.filter(e => e.trainingType === 'MHFA').length,
+      QPR: active.filter(e => e.trainingType === 'QPR').length,
+    },
+    archived: {
+      total: archived.length,
+      MHFA: archived.filter(e => e.trainingType === 'MHFA').length,
+      QPR: archived.filter(e => e.trainingType === 'QPR').length,
+    }
+  }
 }
