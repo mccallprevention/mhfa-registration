@@ -1,4 +1,4 @@
-// Updated app/admin/page.tsx with archive functionality
+// Updated app/admin/page.tsx with auto Google Form data generation
 
 'use client'
 
@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import type { Event } from '@/lib/types'
-import { formatDate, formatTimeRange, getEventCounts, isEventArchived } from '@/lib/utils'
+import { formatDate, formatTimeRange, getEventCounts, isEventArchived, createEventWithFormData } from '@/lib/utils'
 import { MapPin, Clock, Trash2, Plus, RefreshCw, Edit2, LogOut, User, Archive, Calendar } from 'lucide-react'
 
 interface EventFormData {
@@ -30,9 +30,6 @@ interface EventFormData {
   zip: string
   trainingType: 'MHFA' | 'QPR'
   language: 'en' | 'es'
-  googleFormBaseUrl: string
-  dateEntryId: string
-  locationEntryId: string
 }
 
 const emptyFormData: EventFormData = {
@@ -46,10 +43,7 @@ const emptyFormData: EventFormData = {
   state: 'CT',
   zip: '06790',
   trainingType: 'MHFA',
-  language: 'en',
-  googleFormBaseUrl: '',
-  dateEntryId: '',
-  locationEntryId: ''
+  language: 'en'
 }
 
 export default function AdminDashboard() {
@@ -148,10 +142,7 @@ export default function AdminDashboard() {
       state: state || 'CT',
       zip: zip || '06790',
       trainingType: event.trainingType,
-      language: event.language,
-      googleFormBaseUrl: event.googleFormBaseUrl || '',
-      dateEntryId: event.dateEntryId || '',
-      locationEntryId: event.locationEntryId || ''
+      language: event.language
     })
     setFormErrors({})
     setShowModal(true)
@@ -188,7 +179,8 @@ export default function AdminDashboard() {
         ? `${formData.street}, ${formData.town}, ${formData.state} ${formData.zip}`
         : ''
       
-      const eventData = {
+      // Create base event data without Google Form fields
+      const baseEventData = {
         title: formData.title,
         date: formData.date,
         startTime: formData.startTime,
@@ -197,10 +189,11 @@ export default function AdminDashboard() {
         address: address,
         trainingType: formData.trainingType,
         language: formData.language,
-        googleFormBaseUrl: formData.googleFormBaseUrl,
-        dateEntryId: formData.dateEntryId,
-        locationEntryId: formData.locationEntryId
+        isActive: true
       }
+      
+      // Auto-generate Google Form data using the utility function
+      const eventData = createEventWithFormData(baseEventData)
       
       const url = editingEvent ? `/api/events/${editingEvent.id}` : '/api/events'
       const method = editingEvent ? 'PUT' : 'POST'

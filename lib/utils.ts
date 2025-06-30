@@ -1,7 +1,8 @@
-// lib/utils.ts - Complete file with archive functionality
+// lib/utils.ts - Updated with fixes for date prefill and auto form URL generation
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import type { Event, EventDisplay } from "@/lib/types"
+import type { Event, EventDisplay, TrainingType, Language } from "@/lib/types"
+import { URLS, FORM_ENTRY_IDS } from "@/lib/constants"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -22,6 +23,22 @@ export function formatDate(dateString: string): string {
   } catch {
     return dateString // Return original if parsing fails
   }
+}
+
+/**
+ * Format date for Google Forms prefilling (YYYY-MM-DD format)
+ */
+export function formatDateForGoogleForms(dateString: string): string {
+  // Google Forms expects YYYY-MM-DD format, which is the same as our database format
+  return dateString
+}
+
+/**
+ * Get the appropriate Google Form URL based on training type and language
+ */
+export function getGoogleFormUrl(trainingType: TrainingType, language: Language): string {
+  const key = `${trainingType}_${language.toUpperCase()}` as keyof typeof URLS.GOOGLE_FORMS
+  return URLS.GOOGLE_FORMS[key]
 }
 
 /**
@@ -56,9 +73,13 @@ export function generatePrefillUrl(event: Event): string {
   
   const url = new URL(event.googleFormBaseUrl)
   
+  // Add the usp=pp_url parameter for proper Google Forms prefilling
+  url.searchParams.set('usp', 'pp_url')
+  
   // Add pre-filled entries if they exist
   if (event.dateEntryId) {
-    url.searchParams.set(event.dateEntryId, formatDate(event.date))
+    // Use YYYY-MM-DD format (same as database format)
+    url.searchParams.set(event.dateEntryId, formatDateForGoogleForms(event.date))
   }
   
   if (event.locationEntryId && event.location) {
@@ -69,6 +90,18 @@ export function generatePrefillUrl(event: Event): string {
   }
   
   return url.toString()
+}
+
+/**
+ * Create complete event data with auto-generated Google Form information
+ */
+export function createEventWithFormData(eventData: Omit<Event, 'id' | 'createdAt' | 'updatedAt' | 'googleFormBaseUrl' | 'dateEntryId' | 'locationEntryId'>): Omit<Event, 'id' | 'createdAt' | 'updatedAt'> {
+  return {
+    ...eventData,
+    googleFormBaseUrl: getGoogleFormUrl(eventData.trainingType, eventData.language),
+    dateEntryId: FORM_ENTRY_IDS.DATE,
+    locationEntryId: FORM_ENTRY_IDS.LOCATION,
+  }
 }
 
 /**

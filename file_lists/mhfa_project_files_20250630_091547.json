@@ -1,0 +1,437 @@
+{
+  "project": "mhfa-registration",
+  "base_directory": "C:\\Users\\nathan.lannan\\mhfa-registration",
+  "collection_date": "2025-06-30T09:15:47.867118",
+  "total_files": 46,
+  "directories_scanned": [
+    "root (files only)",
+    "app (recursive)",
+    "components (recursive)",
+    "lib (recursive)"
+  ],
+  "excluded_directories": [
+    ".next",
+    "node_modules",
+    ".git",
+    "__pycache__",
+    ".vscode",
+    "dist",
+    "build"
+  ],
+  "files": [
+    {
+      "name": "page.tsx",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\app\\admin\\login\\page.tsx",
+      "relative_path": "app\\admin\\login\\page.tsx",
+      "directory": "app",
+      "size": 4898,
+      "extension": ".tsx",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "page.tsx",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\app\\admin\\page.tsx",
+      "relative_path": "app\\admin\\page.tsx",
+      "directory": "app",
+      "size": 30204,
+      "extension": ".tsx",
+      "modified": "2025-06-27T14:48:43.612099"
+    },
+    {
+      "name": "route.ts",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\app\\api\\events\\[id]\\route.ts",
+      "relative_path": "app\\api\\events\\[id]\\route.ts",
+      "directory": "app",
+      "size": 2194,
+      "extension": ".ts",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "route.ts",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\app\\api\\events\\route.ts",
+      "relative_path": "app\\api\\events\\route.ts",
+      "directory": "app",
+      "size": 2638,
+      "extension": ".ts",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "route.ts",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\app\\api\\test-auth\\route.ts",
+      "relative_path": "app\\api\\test-auth\\route.ts",
+      "directory": "app",
+      "size": 3020,
+      "extension": ".ts",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "route.ts",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\app\\api\\test-db\\route.ts",
+      "relative_path": "app\\api\\test-db\\route.ts",
+      "directory": "app",
+      "size": 731,
+      "extension": ".ts",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "Current.png",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\app\\Current.png",
+      "relative_path": "app\\Current.png",
+      "directory": "app",
+      "size": 223608,
+      "extension": ".png",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "favicon.ico",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\app\\favicon.ico",
+      "relative_path": "app\\favicon.ico",
+      "directory": "app",
+      "size": 4286,
+      "extension": ".ico",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "globals.css",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\app\\globals.css",
+      "relative_path": "app\\globals.css",
+      "directory": "app",
+      "size": 3633,
+      "extension": ".css",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "layout.tsx",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\app\\layout.tsx",
+      "relative_path": "app\\layout.tsx",
+      "directory": "app",
+      "size": 610,
+      "extension": ".tsx",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "page.tsx",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\app\\page.tsx",
+      "relative_path": "app\\page.tsx",
+      "directory": "app",
+      "size": 7301,
+      "extension": ".tsx",
+      "modified": "2025-06-27T14:48:43.612099"
+    },
+    {
+      "name": "page.tsx",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\app\\test-events\\page.tsx",
+      "relative_path": "app\\test-events\\page.tsx",
+      "directory": "app",
+      "size": 10221,
+      "extension": ".tsx",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "event-card.tsx",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\components\\event-card.tsx",
+      "relative_path": "components\\event-card.tsx",
+      "directory": "components",
+      "size": 2574,
+      "extension": ".tsx",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "training-filter.tsx",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\components\\training-filter.tsx",
+      "relative_path": "components\\training-filter.tsx",
+      "directory": "components",
+      "size": 2161,
+      "extension": ".tsx",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "button.tsx",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\components\\ui\\button.tsx",
+      "relative_path": "components\\ui\\button.tsx",
+      "directory": "components",
+      "size": 1868,
+      "extension": ".tsx",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "card.tsx",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\components\\ui\\card.tsx",
+      "relative_path": "components\\ui\\card.tsx",
+      "directory": "components",
+      "size": 1961,
+      "extension": ".tsx",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "dialog.tsx",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\components\\ui\\dialog.tsx",
+      "relative_path": "components\\ui\\dialog.tsx",
+      "directory": "components",
+      "size": 3971,
+      "extension": ".tsx",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "language-toggle.tsx",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\components\\ui\\language-toggle.tsx",
+      "relative_path": "components\\ui\\language-toggle.tsx",
+      "directory": "components",
+      "size": 3146,
+      "extension": ".tsx",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "logo-header.tsx",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\components\\ui\\logo-header.tsx",
+      "relative_path": "components\\ui\\logo-header.tsx",
+      "directory": "components",
+      "size": 1075,
+      "extension": ".tsx",
+      "modified": "2025-06-27T13:35:06.529058"
+    },
+    {
+      "name": "auth-simple.ts",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\lib\\auth-simple.ts",
+      "relative_path": "lib\\auth-simple.ts",
+      "directory": "lib",
+      "size": 3757,
+      "extension": ".ts",
+      "modified": "2025-06-27T13:35:06.529920"
+    },
+    {
+      "name": "constants.ts",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\lib\\constants.ts",
+      "relative_path": "lib\\constants.ts",
+      "directory": "lib",
+      "size": 1349,
+      "extension": ".ts",
+      "modified": "2025-06-27T13:35:06.529920"
+    },
+    {
+      "name": "redis-client.ts",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\lib\\db\\redis-client.ts",
+      "relative_path": "lib\\db\\redis-client.ts",
+      "directory": "lib",
+      "size": 3005,
+      "extension": ".ts",
+      "modified": "2025-06-27T13:35:06.529920"
+    },
+    {
+      "name": "seed.ts",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\lib\\db\\seed.ts",
+      "relative_path": "lib\\db\\seed.ts",
+      "directory": "lib",
+      "size": 690,
+      "extension": ".ts",
+      "modified": "2025-06-27T13:35:06.529920"
+    },
+    {
+      "name": "useEventFilter.ts",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\lib\\hooks\\useEventFilter.ts",
+      "relative_path": "lib\\hooks\\useEventFilter.ts",
+      "directory": "lib",
+      "size": 2597,
+      "extension": ".ts",
+      "modified": "2025-06-27T13:35:06.529920"
+    },
+    {
+      "name": "translations.ts",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\lib\\i18n\\translations.ts",
+      "relative_path": "lib\\i18n\\translations.ts",
+      "directory": "lib",
+      "size": 1737,
+      "extension": ".ts",
+      "modified": "2025-06-27T13:35:06.529920"
+    },
+    {
+      "name": "useTranslation.ts",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\lib\\i18n\\useTranslation.ts",
+      "relative_path": "lib\\i18n\\useTranslation.ts",
+      "directory": "lib",
+      "size": 628,
+      "extension": ".ts",
+      "modified": "2025-06-27T13:35:06.529920"
+    },
+    {
+      "name": "sample-data-generator.ts",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\lib\\sample-data-generator.ts",
+      "relative_path": "lib\\sample-data-generator.ts",
+      "directory": "lib",
+      "size": 3834,
+      "extension": ".ts",
+      "modified": "2025-06-27T13:35:06.529920"
+    },
+    {
+      "name": "sample-data.ts",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\lib\\sample-data.ts",
+      "relative_path": "lib\\sample-data.ts",
+      "directory": "lib",
+      "size": 10508,
+      "extension": ".ts",
+      "modified": "2025-06-27T13:35:06.529920"
+    },
+    {
+      "name": "types.ts",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\lib\\types.ts",
+      "relative_path": "lib\\types.ts",
+      "directory": "lib",
+      "size": 811,
+      "extension": ".ts",
+      "modified": "2025-06-27T13:35:06.529920"
+    },
+    {
+      "name": "utils.ts",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\lib\\utils.ts",
+      "relative_path": "lib\\utils.ts",
+      "directory": "lib",
+      "size": 4265,
+      "extension": ".ts",
+      "modified": "2025-06-27T13:35:06.529920"
+    },
+    {
+      "name": ".env.local",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\.env.local",
+      "relative_path": ".env.local",
+      "directory": "root",
+      "size": 413,
+      "extension": ".local",
+      "modified": "2025-06-27T13:35:42.341112"
+    },
+    {
+      "name": ".gitignore",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\.gitignore",
+      "relative_path": ".gitignore",
+      "directory": "root",
+      "size": 571,
+      "extension": "",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "components.json",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\components.json",
+      "relative_path": "components.json",
+      "directory": "root",
+      "size": 464,
+      "extension": ".json",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "eslint.config.mjs",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\eslint.config.mjs",
+      "relative_path": "eslint.config.mjs",
+      "directory": "root",
+      "size": 409,
+      "extension": ".mjs",
+      "modified": "2025-06-27T13:35:06.529920"
+    },
+    {
+      "name": "Handoff.md",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\Handoff.md",
+      "relative_path": "Handoff.md",
+      "directory": "root",
+      "size": 32890,
+      "extension": ".md",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "middleware.ts",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\middleware.ts",
+      "relative_path": "middleware.ts",
+      "directory": "root",
+      "size": 2611,
+      "extension": ".ts",
+      "modified": "2025-06-27T13:35:06.529920"
+    },
+    {
+      "name": "next-env.d.ts",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\next-env.d.ts",
+      "relative_path": "next-env.d.ts",
+      "directory": "root",
+      "size": 216,
+      "extension": ".ts",
+      "modified": "2025-06-27T13:37:31.302372"
+    },
+    {
+      "name": "next.config.ts",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\next.config.ts",
+      "relative_path": "next.config.ts",
+      "directory": "root",
+      "size": 140,
+      "extension": ".ts",
+      "modified": "2025-06-27T13:35:06.529920"
+    },
+    {
+      "name": "package-lock.json",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\package-lock.json",
+      "relative_path": "package-lock.json",
+      "directory": "root",
+      "size": 252806,
+      "extension": ".json",
+      "modified": "2025-06-27T14:48:43.614094"
+    },
+    {
+      "name": "package.json",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\package.json",
+      "relative_path": "package.json",
+      "directory": "root",
+      "size": 960,
+      "extension": ".json",
+      "modified": "2025-06-27T14:48:43.615265"
+    },
+    {
+      "name": "postcss.config.js",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\postcss.config.js",
+      "relative_path": "postcss.config.js",
+      "directory": "root",
+      "size": 88,
+      "extension": ".js",
+      "modified": "2025-06-27T13:35:06.529920"
+    },
+    {
+      "name": "postcss.config.mjs",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\postcss.config.mjs",
+      "relative_path": "postcss.config.mjs",
+      "directory": "root",
+      "size": 86,
+      "extension": ".mjs",
+      "modified": "2025-06-27T13:35:06.529920"
+    },
+    {
+      "name": "README.md",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\README.md",
+      "relative_path": "README.md",
+      "directory": "root",
+      "size": 1486,
+      "extension": ".md",
+      "modified": "2025-06-27T13:35:06.513354"
+    },
+    {
+      "name": "tailwind.config.js",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\tailwind.config.js",
+      "relative_path": "tailwind.config.js",
+      "directory": "root",
+      "size": 2840,
+      "extension": ".js",
+      "modified": "2025-06-27T13:35:06.545051"
+    },
+    {
+      "name": "tsconfig.json",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\tsconfig.json",
+      "relative_path": "tsconfig.json",
+      "directory": "root",
+      "size": 644,
+      "extension": ".json",
+      "modified": "2025-06-27T13:35:06.546580"
+    },
+    {
+      "name": "vercel.json",
+      "full_path": "C:\\Users\\nathan.lannan\\mhfa-registration\\vercel.json",
+      "relative_path": "vercel.json",
+      "directory": "root",
+      "size": 135,
+      "extension": ".json",
+      "modified": "2025-06-27T13:35:06.546580"
+    }
+  ]
+}

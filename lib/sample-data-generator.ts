@@ -1,6 +1,6 @@
-// lib/sample-data-generator.ts
+// lib/sample-data-generator.ts - Updated to use new utility functions
 import { Event, TrainingType, Language } from '@/lib/types';
-import { URLS, FORM_ENTRY_IDS } from '@/lib/constants';
+import { createEventWithFormData } from '@/lib/utils';
 
 interface EventTemplate {
   title: string;
@@ -64,11 +64,6 @@ const eventTemplates: EventTemplate[] = [
   }
 ];
 
-function getGoogleFormUrl(trainingType: TrainingType, language: Language): string {
-  const key = `${trainingType}_${language.toUpperCase()}` as keyof typeof URLS.GOOGLE_FORMS;
-  return URLS.GOOGLE_FORMS[key];
-}
-
 function generateEventId(date: string, trainingType: string): string {
   const dateStr = date.replace(/-/g, '_');
   const typeStr = trainingType.toLowerCase();
@@ -92,8 +87,8 @@ export function generateSampleEvents(count: number = 20): Event[] {
     const eventDate = new Date(currentYear, currentMonth + monthOffset, dayOffset);
     const dateString = eventDate.toISOString().split('T')[0];
     
-    const event: Event = {
-      id: generateEventId(dateString, template.trainingType),
+    // Create base event data
+    const baseEventData = {
       title: template.title,
       date: dateString,
       startTime: template.startTime,
@@ -102,10 +97,15 @@ export function generateSampleEvents(count: number = 20): Event[] {
       address: template.address,
       trainingType: template.trainingType,
       language: template.language,
-      googleFormBaseUrl: getGoogleFormUrl(template.trainingType, template.language),
-      dateEntryId: FORM_ENTRY_IDS.DATE,
-      locationEntryId: FORM_ENTRY_IDS.LOCATION,
-      isActive: true,
+      isActive: true
+    };
+    
+    // Use the utility function to auto-generate Google Form data
+    const eventDataWithForms = createEventWithFormData(baseEventData);
+    
+    const event: Event = {
+      id: generateEventId(dateString, template.trainingType),
+      ...eventDataWithForms,
       createdAt: now.toISOString(),
       updatedAt: now.toISOString()
     };

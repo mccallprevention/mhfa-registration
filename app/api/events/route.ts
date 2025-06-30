@@ -1,11 +1,11 @@
-// Update app/api/events/route.ts
+// Updated app/api/events/route.ts - Auto-handle Google Form fields
 
 export const runtime = 'nodejs' // 🚨 CRITICAL: Required for Redis
 
 import { NextRequest, NextResponse } from 'next/server'
 import { EventDatabase } from '@/lib/db/redis-client'
 import { seedDatabaseIfEmpty } from '@/lib/db/seed'
-import { filterEventsByArchiveStatus } from '@/lib/utils'
+import { filterEventsByArchiveStatus, createEventWithFormData } from '@/lib/utils'
 
 // GET /api/events - Get all events with optional archive filtering
 export async function GET(request: NextRequest) {
@@ -44,13 +44,13 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/events - Create new event (unchanged)
+// POST /api/events - Create new event with auto-generated Google Form data
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     
-    // Validate required fields
-    const requiredFields = ['title', 'date', 'startTime', 'endTime', 'location', 'trainingType', 'language', 'googleFormBaseUrl']
+    // Validate core required fields (Google Form fields will be auto-generated)
+    const requiredFields = ['title', 'date', 'startTime', 'endTime', 'location', 'trainingType', 'language']
     for (const field of requiredFields) {
       if (!body[field]) {
         return NextResponse.json(
@@ -60,12 +60,22 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const eventData = {
-      ...body,
-      isActive: body.isActive ?? true,
-      timeZone: body.timeZone ?? 'America/Denver',
-      dateEntryId: body.dateEntryId ?? 'entry.123456789',
-      locationEntryId: body.locationEntryId ?? 'entry.987654321',
+    // If Google Form fields are not provided, auto-generate them
+    let eventData
+    if (!body.googleFormBaseUrl || !body.dateEntryId || !body.locationEntryId) {
+      // Use the utility function to auto-generate Google Form data
+      eventData = createEventWithFormData({
+        ...body,
+        isActive: body.isActive ?? true,
+        timeZone: body.timeZone ?? 'America/Denver'
+      })
+    } else {
+      // Use provided Google Form data (for backwards compatibility)
+      eventData = {
+        ...body,
+        isActive: body.isActive ?? true,
+        timeZone: body.timeZone ?? 'America/Denver'
+      }
     }
 
     const newEvent = await EventDatabase.createEvent(eventData)

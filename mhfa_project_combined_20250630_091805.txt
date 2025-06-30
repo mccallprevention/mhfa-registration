@@ -1,0 +1,5002 @@
+MHFA REGISTRATION PROJECT - COMBINED SOURCE FILES
+======================================================================
+Generated on: 2025-06-30T09:18:05.264464
+Base directory: C:\Users\nathan.lannan\mhfa-registration
+======================================================================
+
+
+==================== ROOT DIRECTORY ====================
+
+
+------------------------------------------------------------
+FILE: .env.local
+SIZE: 413 bytes
+MODIFIED: 2025-06-27T13:35:42.341112
+------------------------------------------------------------
+
+# Redis Cloud (copy from Vercel environment variables)
+REDIS_URL="redis://default:bKkR2KGVElh97rZUaLexQaBTSHUx6Bo1@redis-16807.c15.us-east-1-2.ec2.redns.redis-cloud.com:16807"
+
+# NextAuth (generate with: openssl rand -base64 32)
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET="5mbekj1pxaYy3obaNrRKSH7nwU1hGRsi18ivY/YGN2c30X4Zn3ge7l5/TJY="
+
+# Admin Credentials
+ADMIN_USERNAME=testname
+ADMIN_PASSWORD=testpass
+
+
+
+============================================================
+END OF FILE: .env.local
+============================================================
+
+
+------------------------------------------------------------
+FILE: .gitignore
+SIZE: 571 bytes
+MODIFIED: 2025-06-27T13:35:06.513354
+------------------------------------------------------------
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Environment variables
+*.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+
+============================================================
+END OF FILE: .gitignore
+============================================================
+
+
+------------------------------------------------------------
+FILE: components.json
+SIZE: 464 bytes
+MODIFIED: 2025-06-27T13:35:06.513354
+------------------------------------------------------------
+
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "tailwind.config.js",
+    "css": "app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "iconLibrary": "lucide"
+}
+
+============================================================
+END OF FILE: components.json
+============================================================
+
+
+------------------------------------------------------------
+FILE: eslint.config.mjs
+SIZE: 409 bytes
+MODIFIED: 2025-06-27T13:35:06.529920
+------------------------------------------------------------
+
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+import { FlatCompat } from "@eslint/eslintrc";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+});
+
+const eslintConfig = [
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
+];
+
+export default eslintConfig;
+
+
+============================================================
+END OF FILE: eslint.config.mjs
+============================================================
+
+
+------------------------------------------------------------
+FILE: Handoff.md
+SIZE: 32890 bytes
+MODIFIED: 2025-06-27T13:35:06.513354
+------------------------------------------------------------
+
+# 🚀 Event Registration Platform - Development Handoff Document
+
+> **Note to Future Developers & Maintainers:**
+>
+> The goal of this document is to make it so that the next developer can just read this and hit the ground running.
+>
+> **Document Maintenance Protocol:**
+>
+> 1. This protocol must be retained in all subsequent versions of this document.  
+> 2. Upon completion of a feature, this document must be updated to reflect the current project status and any significant development choices.  
+> 3. Updates should detail architectural decisions, particularly those affecting file structure, shared utilities, or core business logic, to facilitate efficient onboarding.  
+> 4. The existing structure of this document should be preserved. Revisions should be additive unless a fundamental change in the project's strategic direction necessitates a structural overhaul.
+
+*Last Updated: June 27, 2025*
+
+## 🧩 Project Scope & Goals
+
+### 🎯 Primary Goal
+
+Build a low-maintenance, low-cost, bilingual website that can:
+
+  - Display upcoming **MHFA** and **QPR** events in both English and Spanish.
+  - Let users register via language-specific, prefilled Google Forms.
+  - Automatically archive past events while maintaining admin access to historical data.
+  - Provide intuitive admin controls for event management with Active/Archived views.
+  - Automatically send confirmation and reminder emails (future phase).
+  - Give admins easy control over events and messaging (future phase).
+  - Run entirely on free-tier services (Vercel, Redis Cloud, Make, Google).
+
+## 🏗️ Architecture Overview
+
+### 1\. 🖥️ Frontend – Public Event Listing Site
+
+  - **Stack:** Next.js (App Router) + Tailwind CSS v3 + TypeScript, deployed on Vercel.
+  - **Current Features:** A fully branded, bilingual, and responsive UI. Includes dynamic event filtering by language (EN/ES) and training type (MHFA/QPR). Automatically displays only active (future) events to public users.
+  - **Performance:** Designed for fast loads, with responsive grid layouts that maintain perfect alignment across devices.
+
+### 2\. 🔐 Backend – Admin Dashboard (**COMPLETE**)
+
+  - **Stack:** Next.js API routes with Redis Cloud database and authentication.
+  - **Features:** An auth-protected `/admin` page for full CRUD (Create, Read, Update, Delete) of events with Active/Archived view toggle.
+  - **Data Model:** Immutable Event ID, Title, Date, Time, Location, Language, Training Type, Google Form links.
+  - **Archive System:** Events automatically archive when their date passes, with admin access to view historical events.
+
+### 3\. 📄 Prefilled Form Links
+
+  - **Method:** Unique Google Form links exist for each event permutation (e.g., MHFA English, QPR Spanish).
+  - **Validation:** The `generatePrefillUrl()` utility correctly URL-encodes event details into the link.
+
+### 4\. 📩 Email Automation – Make Scenarios (Future Phase)
+
+  - **Platform:** Make.com (free tier).
+  - **Confirmation:** Will be triggered by new Google Form submissions.
+  - **Reminder:** A daily job will check for upcoming events and email registrants.
+  - **Calendar:** Will generate `.ics` attachments for "Add to calendar" functionality.
+
+### 5\. 🗄️ Data Storage (**IMPLEMENTED**)
+
+  - **Events Database:** **Redis Cloud** via Vercel Storage (30MB free tier).
+  - **Connection:** Standard Redis protocol via `REDIS_URL` environment variable.
+  - **Client:** Uses `redis` npm package with `RedisClientType` for type safety.
+  - **Archive Logic:** Date-based automatic archiving with API filtering support.
+  - **Registrations:** Google Sheets will be the database for user registrations (future phase).
+  - **Backups:** Plan includes weekly CSV exports of registration data.
+
+-----
+
+## ✅ CURRENT STATUS: Phase 4 Complete - Full Admin Dashboard with Archive System
+
+### 🏆 **Major Milestones Achieved:**
+
+1. **Interactive Bilingual Event Filtering** - The public-facing front-end is feature-complete.
+2. **Architecture Refactoring** - Codebase has been refactored for maintainability and scalability.
+3. **Database Infrastructure** - Redis Cloud database deployed and connected.
+4. **Complete API Layer** - Full CRUD operations implemented and tested.
+5. **API-Driven Frontend** - Main application now fetches all data from database.
+6. **Database Manipulation Verified** - Real-time CRUD operations confirmed working.
+7. **Admin Dashboard Complete** - Full admin interface with authentication and CRUD operations.
+8. **Automatic Archive System** - Events automatically archive based on dates with admin access to historical data.
+9. **Responsive Card Layout System** - Perfect grid alignment on desktop while maintaining natural mobile spacing.
+
+**✅ COMPLETED:**
+
+  - **Step A:** Foundational, accessible UI components (`Button`, `Card`).
+  - **Step B:** Full branding and theming to match McCall's guidelines.
+  - **Step C:** Reusable, polished brand components (`LogoHeader`, `LanguageToggle`).
+  - **Step D:** Expanded `Event` type system to support multiple training types and languages.
+  - **Step E:** Full bilingual support, with distinct English and Spanish events and UI text.
+  - **Step F:** **Core filtering logic implemented:** Events are now correctly filtered first by language, then by training type.
+  - **Step G:** All known TypeScript, ESLint, and React Hydration errors have been resolved.
+  - **Step H:** **Architecture refactoring completed:**
+    - Fixed critical type duplication issue
+    - Implemented proper i18n translation system
+    - Extracted all constants and configuration
+    - Created reusable custom hooks
+    - Reduced sample data file from 600+ to ~100 lines
+  - **Step I:** **Database infrastructure implemented:**
+    - Redis Cloud database via Vercel Storage (30MB free)
+    - Type-safe database client with singleton connection pattern
+    - Full CRUD operations for events
+    - Database seeding functionality
+    - Production-ready API routes with proper runtime configuration
+  - **Step J:** **Complete API layer implemented:**
+    - `/api/events` - GET (with auto-seeding) and POST endpoints
+    - `/api/events/[id]` - GET, PUT, DELETE for individual events
+    - Next.js 15 async params compatibility resolved
+    - Comprehensive error handling and validation
+  - **Step K:** **Frontend API integration completed:**
+    - Main page now fetches all events from database API
+    - Loading and error states implemented
+    - Real-time database changes verified working
+    - Auto-seeding on first load confirmed
+  - **Step L:** **Critical timezone bug fixed:**
+    - Implemented `parseLocalDate` helper function
+    - Fixed JavaScript UTC date parsing issues
+    - Date consistency achieved between frontend and admin views
+    - All date utilities updated to use local timezone parsing
+  - **Step M (NEW):** **Complete admin dashboard implemented:**
+    - Authentication system with NextAuth.js
+    - Protected `/admin` routes with session management
+    - Full CRUD interface for event management
+    - Admin-only access to all event operations
+  - **Step N (NEW):** **Automatic archive system implemented:**
+    - Events automatically archive when their date passes (11:59 PM on event day)
+    - Frontend users only see active (future) events
+    - Admin users can toggle between Active and Archived views
+    - API endpoints support archive filtering (`?archived=true`)
+    - No manual archiving required - fully date-based automation
+  - **Step O (NEW):** **Enhanced EventCard layout system:**
+    - Responsive grid alignment ensuring perfect row alignment on desktop
+    - Natural mobile stacking without artificial constraints
+    - Date/time separation on individual lines for better readability
+    - Consistent Register button alignment across cards in same row
+    - Image-free variant with optimized left-alignment
+
+**🎯 NEXT IMMEDIATE STEP:** Phase 5 - Email Automation & Make.com Integration
+
+-----
+
+## 🛠️ Critical Development Environment Details
+
+### **TypeScript Configuration (ESSENTIAL for new devs)**
+
+```json
+// tsconfig.json - MUST include baseUrl for @/ imports to work
+{
+  "compilerOptions": {
+    "baseUrl": ".",  // 🚨 CRITICAL: Required for @/ path aliases
+    "paths": {
+      "@/*": ["./*"]
+    }
+  }
+}
+```
+
+**❗ Key Learning:** Without `baseUrl`, you get "is not a module" errors. All imports use `@/lib/...` pattern.
+
+### **Redis API Routes Configuration (CRITICAL)**
+
+**🚨 ESSENTIAL: Every API route that uses Redis MUST include this as the first export:**
+
+```typescript
+export const runtime = 'nodejs' // Required for Redis client
+```
+
+**Why:** The `redis` npm package uses Node.js APIs that aren't available in the Edge runtime. Without this, routes will work locally but fail in production with "module not found" errors.
+
+### **Environment Variables (PRODUCTION)**
+
+**Required in Vercel:**
+```env
+REDIS_URL=redis://default:password@host:port  # Auto-set by Vercel Storage
+NEXTAUTH_SECRET=your_generated_secret
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your_secure_password
+```
+
+**Required in `.env.local`:**
+```env
+# Redis Cloud (copy from Vercel environment variables)
+REDIS_URL=redis://default:password@host:port
+
+# NextAuth (generate with: openssl rand -base64 32)
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_generated_secret_here
+
+# Admin Credentials
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your_chosen_password_here
+```
+
+### **Browser Extension Hydration Warnings**
+
+If you see hydration mismatch errors in development, they're likely caused by browser extensions (Grammarly, password managers, etc.). Solution: Add `suppressHydrationWarning` to both `<html>` and `<body>` tags in `layout.tsx`.
+
+### **Git Workflow (Best Practice)**
+
+#### Creating a Feature Branch
+
+Use feature branches for all new work to keep the `main` branch stable.
+
+```bash
+# Create and switch to a new branch before making changes
+git checkout -b feature/your-feature-name
+```
+
+#### Merging a Feature Branch into Main
+
+Follow these steps to safely merge your completed feature back into the `main` branch.
+
+```bash
+# 1. Go to the main branch and make sure it's up-to-date.
+git checkout main
+git pull origin main
+
+# 2. Switch back to your feature branch.
+git checkout feature/your-feature-name
+
+# 3. Merge main into your feature branch to resolve any conflicts locally.
+# (This step is optional but recommended for complex projects).
+git merge main
+
+# 4. Once ready, switch back to the main branch and merge your feature branch into it.
+git checkout main
+git merge feature/your-feature-name
+
+# 5. Push the newly updated main branch to the remote repository.
+git push origin main
+
+# 6. (Optional) Clean up by deleting the now-merged feature branch.
+git branch -d feature/your-feature-name # Deletes locally
+git push origin --delete feature/your-feature-name # Deletes remotely
+```
+
+### **Development Commands**
+
+```bash
+npm run dev      # Starts dev server at http://localhost:3000
+npm run build    # Creates an optimized production build, checks for errors
+npm run lint     # Runs the linter to check for code quality issues
+```
+
+-----
+
+## 📁 Critical File Structure & Key Components
+
+```
+📁 mhfa-registration/
+├── app/
+│   ├── api/
+│   │   ├── test-db/
+│   │   │   └── route.ts         # ✅ Database connection test endpoint
+│   │   ├── test-auth/
+│   │   │   └── route.ts         # ✅ Authentication test endpoint
+│   │   └── events/              # ✅ COMPLETE: Main events API with archive support
+│   │       ├── route.ts         # ✅ GET/POST endpoints (supports ?archived=true)
+│   │       └── [id]/
+│   │           └── route.ts     # ✅ GET/PUT/DELETE for individual events
+│   ├── admin/                   # ✅ NEW: Complete admin dashboard
+│   │   ├── login/
+│   │   │   └── page.tsx         # ✅ Admin login interface
+│   │   └── page.tsx             # ✅ Protected admin dashboard with archive tabs
+│   ├── test-events/
+│   │   └── page.tsx             # ✅ Database testing interface
+│   ├── globals.css              # 🎨 CRITICAL: McCall branding CSS variables
+│   ├── layout.tsx               # ✅ Root layout with hydration warning suppression
+│   └── page.tsx                 # ✅ UPDATED: API-driven, shows active events only
+├── components/
+│   ├── ui/
+│   │   ├── button.tsx           # Base button component
+│   │   ├── card.tsx             # Base card components
+│   │   ├── logo-header.tsx      # ✅ Reusable McCall Logo component
+│   │   └── language-toggle.tsx  # ✅ Interactive, responsive language toggle
+│   ├── event-card.tsx           # ✅ ENHANCED: Responsive grid alignment system
+│   └── training-filter.tsx      # MHFA/QPR/All filter buttons
+└── lib/
+    ├── db/                      # ✅ Database layer
+    │   ├── redis-client.ts      # ✅ Type-safe Redis client with CRUD operations
+    │   └── seed.ts              # ✅ Database seeding utilities
+    ├── constants.ts             # ✅ Centralized configuration
+    ├── types.ts                 # ✅ Defines the shape of Event data (w/ language)
+    ├── utils.ts                 # ✅ ENHANCED: Archive utilities + responsive card helpers
+    ├── sample-data.ts           # ✅ DEPRECATED: Use sample-data-generator.ts
+    ├── sample-data-generator.ts # ✅ Dynamic sample data generation
+    ├── hooks/
+    │   └── useEventFilter.ts    # ✅ Reusable filtering logic
+    └── i18n/
+        ├── translations.ts      # ✅ Centralized translations
+        └── useTranslation.ts    # ✅ Translation hook
+```
+
+### **🗄️ Database Layer**
+
+**Database Client (`lib/db/redis-client.ts`):**
+- Singleton Redis connection pattern for efficiency
+- Type-safe operations using `RedisClientType`
+- Full CRUD operations: `getAllEvents()`, `createEvent()`, `updateEvent()`, `deleteEvent()`
+- Auto-seeding functionality for development
+- Production-ready error handling
+
+**Key Functions Available:**
+```typescript
+// READ operations
+EventDatabase.getAllEvents(): Promise<Event[]>
+EventDatabase.getEventById(id: string): Promise<Event | null>
+
+// WRITE operations  
+EventDatabase.createEvent(data: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>): Promise<Event>
+EventDatabase.updateEvent(id: string, updates: Partial<Event>): Promise<Event | null>
+EventDatabase.deleteEvent(id: string): Promise<boolean>
+
+// UTILITY operations
+EventDatabase.seedDatabase(initialEvents: Event[]): Promise<void>
+```
+
+### **🗃️ Archive System (NEW)**
+
+**Automatic Archiving Logic:**
+Events are automatically considered "archived" when their date has passed. The archive determination happens at the API level using date comparison:
+
+```typescript
+// lib/utils.ts - Archive Logic
+export function isEventArchived(eventDate: string): boolean {
+  const today = new Date()
+  const event = new Date(eventDate + 'T23:59:59') // End of event day
+  
+  // Reset today to start of day for fair comparison
+  today.setHours(0, 0, 0, 0)
+  
+  return event < today
+}
+```
+
+**API Endpoints with Archive Support:**
+```typescript
+// Active events only (default behavior)
+GET /api/events
+
+// Archived events only
+GET /api/events?archived=true  
+
+// All events (active + archived)
+GET /api/events?includeArchived=true
+```
+
+**Archive Utility Functions:**
+```typescript
+// Filter events by archive status
+filterEventsByArchiveStatus(events: Event[], showArchived: boolean): Event[]
+
+// Get counts for both active and archived events
+getEventCounts(events: Event[]): {
+  active: { total: number, MHFA: number, QPR: number },
+  archived: { total: number, MHFA: number, QPR: number }
+}
+```
+
+### **🎨 Enhanced EventCard Component (NEW)**
+
+**Responsive Grid Alignment System:**
+The EventCard component now features a sophisticated responsive system that ensures perfect alignment in grid layouts while maintaining natural spacing on mobile.
+
+```typescript
+// components/event-card.tsx - Key Responsive Classes
+className="w-full lg:h-full lg:flex lg:flex-col"      // Grid behavior on large screens
+className="pb-3 lg:flex-1"                           // Content area expansion  
+className="text-xl text-mccall-navy mb-4 lg:h-[3rem] lg:flex lg:items-start" // Fixed title height
+```
+
+**Layout Features:**
+- **Desktop (lg: 1024px+):** Fixed heights for perfect row alignment
+- **Mobile/Tablet (< 1024px):** Natural content-based heights
+- **Date/Time Separation:** Date and time display on separate lines
+- **Icon Alignment:** Clock and MapPin icons perfectly aligned
+- **Button Alignment:** Register buttons align across all cards in same row
+
+**Breakpoint Strategy:**
+- Uses `lg:` (1024px) breakpoint to match when 3-column grids appear
+- Avoids artificial constraints on medium-width desktop windows
+- Ensures natural mobile stacking behavior
+
+### **🔐 Admin Dashboard System (NEW)**
+
+**Authentication (`app/admin/login/page.tsx`):**
+- Simple credential-based authentication
+- Session management with redirect handling
+- Protected route middleware
+
+**Dashboard Interface (`app/admin/page.tsx`):**
+- **Active Events Tab:** Shows upcoming events with full CRUD operations
+- **Archived Events Tab:** Shows past events in read-only mode
+- **Statistics Display:** Event counts for both active and archived categories
+- **Grid Layout:** Uses same responsive card system as frontend
+- **Training Type Filtering:** Works within both Active and Archived views
+
+**Admin-Only Features:**
+- Event creation, editing, and deletion
+- Toggle between Active/Archived views
+- Access to historical event data
+- Real-time event statistics
+
+### **🧩 Type System (lib/types.ts)**
+
+**✅ COMPLETE & EXPANDED** - The core `Event` interface and related types.
+
+```typescript
+export type TrainingType = "MHFA" | "QPR";
+export type Language = "en" | "es";
+
+export interface Event {
+  id: string;
+  title: string;
+  date: string;
+  startTime: string;  
+  endTime: string;  
+  location: string;
+  address?: string;  
+  trainingType: TrainingType;
+  language: Language;
+  googleFormBaseUrl: string;
+  dateEntryId: string;
+  locationEntryId: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  timeZone?: string;
+}
+
+export interface UrlValidationResult {
+  isValid: boolean;
+  status?: number;
+  error?: string;
+  url: string;
+}
+
+export interface EventDisplay extends Event {
+  isUpcoming: boolean;
+  displayDate: string;
+  displayTime: string;
+  prefillUrl: string;
+  urlValidation?: UrlValidationResult;
+}
+```
+
+### **⚙️ Utility Functions (lib/utils.ts)**
+
+**✅ ENHANCED** - Now includes archive management and responsive card utilities:
+
+```typescript
+// Archive Management
+isEventArchived(eventDate: string): boolean
+filterEventsByArchiveStatus(events: Event[], showArchived: boolean): Event[]
+getEventCounts(events: Event[]): { active: {...}, archived: {...} }
+
+// Date Formatting (Timezone-Safe)
+formatDate(dateString: string): string
+formatTimeRange(startTime: string, endTime: string): string
+parseLocalDate(dateString: string): Date
+
+// Event Processing
+enrichEventForDisplay(event: Event): EventDisplay
+sortEventsByDate(events: Event[], ascending: boolean): Event[]
+generatePrefillUrl(event: Event): string
+```
+
+### **🌐 i18n Translation System**
+
+**✅ COMPLETE** - Professional translation system replacing inline ternary operators.
+
+```typescript
+// Usage in components:
+import { useTranslation } from '@/lib/i18n/useTranslation';
+
+const { t } = useTranslation(currentLanguage);
+<h1>{t('hero.title')}</h1>
+```
+
+### **🎯 Custom Hooks**
+
+**✅ useEventFilter Hook** - Encapsulates all filtering logic with useful computed properties:
+
+```typescript
+const {
+  currentLanguage,
+  activeFilter,
+  setCurrentLanguage,
+  setActiveFilter,
+  filteredEvents,
+  eventCounts,        // { all: 10, MHFA: 6, QPR: 4 }
+  upcomingEventCounts,
+  hasEvents,
+  hasUpcomingEvents
+} = useEventFilter(events); // Now accepts events from API
+```
+
+-----
+
+## 🚨 Important Development Choices & Learnings
+
+### **1. The Core Filtering Logic (The Fix)**
+
+The central challenge was displaying events correctly based on two criteria. The solution in `app/page.tsx` is a **chained filter**, which is the most important piece of logic on the page.
+
+```typescript
+const filteredEvents = events // Now from API, not sample data
+  .filter(event => event.language === currentLanguage) // 1. Filter by language FIRST
+  .filter(event => activeFilter === "all" || event.trainingType === activeFilter); // 2. Then filter by type
+```
+
+### **2. Bilingual Support Architecture**
+
+  - **Data:** The `language: "en" | "es"` property on the `Event` type is the foundation.
+  - **Utils:** Functions in `lib/utils.ts` accept a `language` parameter for correct formatting.
+  - **UI:** Now uses centralized translation system via `useTranslation` hook.
+
+### **3. Brand as a Theme via CSS Variables**
+
+  - All McCall brand colors are defined as CSS custom properties (variables) in `app/globals.css`.
+  - Tailwind configuration (`tailwind.config.js`) is extended to recognize these variables (e.g., `bg-mccall-navy`).
+  - Constants are now also available in `lib/constants.ts` for JavaScript usage.
+
+### **4. Component Organization**
+
+  - **`components/ui/`** is for generic, reusable primitives (e.g., a button, a logo).
+  - **`components/`** is for specific, composite components that solve an app problem (e.g., an event card).
+  - **`lib/hooks/`** contains custom React hooks for reusable logic.
+  - **`lib/i18n/`** contains all internationalization/translation files.
+  - **`lib/db/`** contains all database-related functionality.
+
+### **5. HTML Semantics & Hydration Errors**
+
+  - React hydration errors from browser extensions are suppressed with `suppressHydrationWarning` on both `<html>` and `<body>` tags.
+  - Previous hydration error in `event-card.tsx` was fixed by replacing invalid `<p>` tag nesting.
+
+### **6. Architecture Refactoring**
+
+  - **Type Safety:** Fixed critical type duplication bug where `utils.ts` contained full copy of all types.
+  - **Maintainability:** Sample data reduced from 600+ lines to ~100 lines with generator function.
+  - **Scalability:** All constants, translations, and reusable logic extracted to dedicated modules.
+  - **Import Pattern:** All imports now use `@/lib/...` pattern for consistency and reliability.
+
+### **7. Database Architecture**
+
+  - **Redis Cloud Choice:** Selected over Upstash or old Vercel KV for better reliability and performance.
+  - **Singleton Pattern:** Database connection reuses single client instance for efficiency.
+  - **Type Safety:** Full TypeScript integration with `RedisClientType` from `redis` package.
+  - **Error Handling:** Comprehensive try/catch blocks with fallback behaviors.
+  - **Production Ready:** Proper runtime configuration prevents deployment failures.
+
+### **8. Critical Timezone Handling**
+
+  - **JavaScript Date Parsing Bug:** `new Date("2025-06-05")` parses as UTC midnight, then converts to local timezone
+  - **Solution Implemented:** `parseLocalDate()` helper function parses YYYY-MM-DD strings as local time
+  - **Functions Fixed:** `formatDate()`, `isEventUpcoming()`, `sortEventsByDate()` all use local time parsing
+  - **Impact:** Prevents off-by-one-day errors between database dates and frontend display
+  - **Pattern:** Always use `parseLocalDate(dateString)` instead of `new Date(dateString)` for YYYY-MM-DD dates
+
+### **9. Archive System Design (NEW)**
+
+  - **Date-Based Logic:** Archive status determined by date comparison, not database flags
+  - **API-Level Filtering:** Archive filtering happens at the API endpoint level for efficiency
+  - **No Manual Archiving:** Events automatically archive when their date passes (11:59 PM)
+  - **Backwards Compatible:** Existing events work seamlessly with archive system
+  - **Admin Access:** Admins retain full access to archived events for historical reference
+
+### **10. Responsive Card Layout Strategy (NEW)**
+
+  - **Breakpoint Selection:** Uses `lg:` (1024px) to match when 3-column grids actually appear
+  - **Mobile-First:** Natural content heights on mobile prevent artificial spacing constraints
+  - **Grid Alignment:** Perfect row alignment on desktop while maintaining accessibility
+  - **Performance Optimized:** CSS-only solution with no JavaScript layout calculations
+  - **Future-Proof:** Responsive system scales well with design system changes
+
+-----
+
+## 🧠 Notes for AI Coding Assistance
+
+### **Critical Information for AI Assistants**
+
+**If your training data cutoff is before January 31, 2025, you may have outdated information about:**
+
+#### **1. Vercel Database Options (MAJOR CONFUSION SOURCE)**
+
+**❌ OUTDATED (Pre-2025):**
+- Vercel KV was a direct Vercel service
+- Used `@vercel/kv` package with `KV_REST_API_URL` and `KV_REST_API_TOKEN`
+- Setup through Vercel Storage tab with "KV" option
+
+**✅ CURRENT (2025):**
+- Vercel Storage now uses **Redis Cloud** as the provider
+- Uses standard `redis` package with single `REDIS_URL` environment variable
+- Setup through Vercel Storage → "Create Database" → "Redis" (powered by Redis Cloud)
+- **30MB free tier** (not the 25MB often mentioned in older guides)
+
+#### **2. API Routes Runtime Configuration**
+
+**❌ OUTDATED:** 
+- API routes automatically work with all packages
+- Edge runtime is sufficient for most use cases
+
+**✅ CURRENT REQUIREMENT:**
+- Any API route using `redis` package **MUST** include: `export const runtime = 'nodejs'`
+- This must be the **first export** in the file
+- Without this, routes work locally but fail in production with "module not found" errors
+- This is due to Redis requiring Node.js APIs not available in Edge runtime
+
+#### **3. Redis Client Patterns**
+
+**❌ OUTDATED:**
+- Using `any` types for Redis clients
+- Direct connection in each function
+- REST-based clients for Vercel deployments
+
+**✅ CURRENT BEST PRACTICE:**
+- Import `RedisClientType` from `redis` for proper typing
+- Singleton connection pattern to reuse client instance
+- Standard Redis protocol (TCP) not REST
+- Proper connection management with error handlers
+
+#### **4. Package Dependencies**
+
+**❌ OUTDATED GUIDES SUGGEST:**
+```bash
+npm install @vercel/kv        # Wrong for current setup
+npm install @upstash/redis    # Wrong for Redis Cloud
+```
+
+**✅ CORRECT FOR REDIS CLOUD:**
+```bash
+npm install redis             # Standard Redis client
+npm install next-auth         # For authentication
+npm install --save-dev @types/node @types/next-auth
+```
+
+#### **5. Environment Variable Patterns**
+
+**❌ OUTDATED:**
+```env
+KV_REST_API_URL=...           # Old Vercel KV
+KV_REST_API_TOKEN=...
+UPSTASH_REDIS_REST_URL=...    # Upstash specific
+UPSTASH_REDIS_REST_TOKEN=...
+```
+
+**✅ CURRENT:**
+```env
+REDIS_URL=redis://default:password@host:port  # Single Redis Cloud URL
+```
+
+### **Key Debugging Hints:**
+
+1. **"Module not found" errors in production:** Add `export const runtime = 'nodejs'` to API routes
+2. **Connection refused locally:** Check that `REDIS_URL` is set in `.env.local`
+3. **Works locally, fails in production:** Usually missing runtime configuration
+4. **TypeScript errors with Redis:** Use `RedisClientType` instead of `any`
+5. **Archive events not filtering:** Check date format (YYYY-MM-DD) and API parameters
+6. **Card layout misalignment:** Ensure responsive classes use `lg:` breakpoint, not `md:`
+
+### **Archive System Testing (NEW):**
+```javascript
+// To test archive system:
+// 1. Create event with yesterday's date - should appear in Archived tab
+// 2. Create event with tomorrow's date - should appear in Active tab  
+// 3. Check frontend - only future events should be visible
+// 4. Toggle admin tabs - should see different event sets
+```
+
+### **Responsive Layout Testing (NEW):**
+```javascript
+// To test responsive card alignment:
+// 1. Desktop (1024px+): Cards should have equal heights, aligned buttons
+// 2. Mobile/Tablet (< 1024px): Cards should have natural heights
+// 3. Resize window: Should transition smoothly between behaviors
+// 4. Different content lengths: Should maintain alignment in desktop grid
+```
+
+### **Reliable Information Sources (as of 2025):**
+- Vercel Storage documentation (not older KV docs)
+- Redis Cloud official documentation
+- Next.js App Router API routes documentation
+- This handoff document (maintained current)
+
+-----
+
+## 📋 Next Steps for Development
+
+### **🎯 Phase 5: Email Automation & Make.com Integration (NEXT)**
+
+**✅ FOUNDATION COMPLETE:**
+- Database infrastructure and client
+- Complete API layer with CRUD operations and archive support
+- Frontend integration with API-driven architecture
+- Full admin dashboard with authentication and archive management
+- Responsive card layout system for optimal user experience
+
+**🔄 UPCOMING TASKS:**
+1. **Make.com Scenario Setup:**
+   - Create Google Form submission watchers
+   - Implement confirmation email triggers
+   - Set up reminder email daily checks using existing archive logic
+   - Calendar invitation generation for confirmed registrants
+
+2. **Email Template Design:**
+   - Bilingual confirmation email templates
+   - Event reminder email templates with calendar attachments
+   - Branded email styling matching website design
+   - Dynamic content insertion from event data
+
+3. **Google Sheets Integration:**
+   - Registration data collection from forms
+   - Data formatting using existing `formatDateForSheets` utility
+   - Backup and export capabilities for admin users
+   - Integration with reminder email system
+
+### **📈 Technical Debt & Future Improvements**
+
+1. **Testing:** Add unit tests for archive utilities and responsive layout components
+2. **Error Handling:** Implement proper error boundaries for admin dashboard
+3. **Performance:** Consider implementing ISR for event pages with archive support
+4. **Accessibility:** Conduct full accessibility audit on admin dashboard
+5. **SEO:** Add proper meta tags and structured data for events
+6. **Monitoring:** Add logging for archive operations and admin actions
+
+### **🚀 Potential Feature Enhancements**
+
+1. **Advanced Archive Management:**
+   - Bulk archive operations for admin users
+   - Archive date range filtering (e.g., "Events from last month")
+   - Export archived events to CSV/PDF
+   - Archive statistics and reporting
+
+2. **Enhanced Admin Features:**
+   - Event duplication functionality
+   - Bulk import/export capabilities
+   - Event recurrence for repeating trainings
+   - Enhanced form validation and preview functionality
+
+3. **User Experience Improvements:**
+   - Real-time event notifications
+   - Advanced filtering options (date ranges, location)
+   - Event search functionality
+   - Mobile-optimized admin interface
+
+-----
+
+## 🎉 Current Status Summary
+
+The codebase has been successfully completed through Phase 4 with:
+- ✅ Clean architecture maintained and enhanced
+- ✅ Type safety throughout entire stack
+- ✅ Production-ready database layer with verified CRUD operations
+- ✅ Complete API layer with archive filtering support
+- ✅ Fully API-driven frontend with automatic archive handling
+- ✅ Complete admin dashboard with authentication and archive management
+- ✅ Automatic event archiving system based on event dates
+- ✅ Advanced responsive card layout system for optimal grid alignment
+- ✅ Real-time database manipulation confirmed working across all interfaces
+- ✅ Critical timezone parsing bug resolved
+- ✅ Date consistency achieved across all interfaces
+- ✅ Professional i18n system implemented
+- ✅ Centralized configuration and reusable patterns
+- ✅ Zero TypeScript or ESLint errors
+- ✅ Browser extension compatibility maintained
+- ✅ Scalable database patterns established
+- ✅ Next.js 15 compatibility ensured
+- ✅ Mobile-first responsive design with desktop grid optimization
+
+**The application is now production-ready with a complete event management system featuring automatic archiving, full admin controls, and optimized user experience across all devices. Ready for email automation integration!**
+
+============================================================
+END OF FILE: Handoff.md
+============================================================
+
+
+------------------------------------------------------------
+FILE: middleware.ts
+SIZE: 2611 bytes
+MODIFIED: 2025-06-27T13:35:06.529920
+------------------------------------------------------------
+
+// middleware.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { isAuthenticated, createLoginRedirect } from '@/lib/auth-simple'
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  const startTime = Date.now()
+
+  // Add security headers to all responses
+  const response = NextResponse.next()
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('X-Frame-Options', 'DENY')
+  response.headers.set('X-XSS-Protection', '1; mode=block')
+
+  // Only run auth middleware for admin routes
+  if (pathname.startsWith('/admin')) {
+    console.log(`🔐 Auth check for: ${pathname}`)
+
+    // Allow access to login page without authentication
+    if (pathname === '/admin/login') {
+      // If user is already authenticated and tries to access login page,
+      // redirect them to the admin dashboard
+      const authenticated = await isAuthenticated(request)
+      if (authenticated) {
+        console.log(`↩️  Authenticated user redirected from login to dashboard`)
+        const adminUrl = new URL('/admin', request.url)
+        const redirectResponse = NextResponse.redirect(adminUrl)
+        
+        // Copy security headers to redirect response
+        response.headers.forEach((value, key) => {
+          redirectResponse.headers.set(key, value)
+        })
+        
+        return redirectResponse
+      }
+      console.log(`✅ Unauthenticated user accessing login page`)
+      return response
+    }
+
+    // For all other admin routes, check authentication
+    const authenticated = await isAuthenticated(request)
+    
+    if (!authenticated) {
+      console.log(`❌ Unauthenticated access attempt to: ${pathname}`)
+      const loginRedirect = createLoginRedirect(request)
+      
+      // Copy security headers to redirect response
+      response.headers.forEach((value, key) => {
+        loginRedirect.headers.set(key, value)
+      })
+      
+      return loginRedirect
+    }
+
+    console.log(`✅ Authenticated access to: ${pathname}`)
+    const duration = Date.now() - startTime
+    console.log(`⏱️  Auth check completed in ${duration}ms`)
+    
+    return response
+  }
+
+  // For all non-admin routes, continue without any checks
+  return response
+}
+
+// Configure which routes the middleware should run on
+export const config = {
+  matcher: [
+    // Match all admin routes
+    '/admin/:path*',
+    // Exclude static files and API routes that don't need protection
+    '/((?!api|_next/static|_next/image|favicon.ico|img_assets).*)',
+  ]
+}
+
+============================================================
+END OF FILE: middleware.ts
+============================================================
+
+
+------------------------------------------------------------
+FILE: next-env.d.ts
+SIZE: 216 bytes
+MODIFIED: 2025-06-27T13:37:31.302372
+------------------------------------------------------------
+
+/// <reference types="next" />
+/// <reference types="next/image-types/global" />
+
+// NOTE: This file should not be edited
+// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.
+
+
+============================================================
+END OF FILE: next-env.d.ts
+============================================================
+
+
+------------------------------------------------------------
+FILE: next.config.ts
+SIZE: 140 bytes
+MODIFIED: 2025-06-27T13:35:06.529920
+------------------------------------------------------------
+
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+};
+
+export default nextConfig;
+
+
+============================================================
+END OF FILE: next.config.ts
+============================================================
+
+
+------------------------------------------------------------
+FILE: package.json
+SIZE: 960 bytes
+MODIFIED: 2025-06-27T14:48:43.615265
+------------------------------------------------------------
+
+{
+  "name": "mhfa-registration",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.14",
+    "@supabase/supabase-js": "^2.50.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "jose": "^6.0.11",
+    "lucide-react": "^0.523.0",
+    "next": "15.3.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "redis": "5.5.6",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/node": "20.19.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.4",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5"
+  }
+}
+
+
+============================================================
+END OF FILE: package.json
+============================================================
+
+
+------------------------------------------------------------
+FILE: postcss.config.js
+SIZE: 88 bytes
+MODIFIED: 2025-06-27T13:35:06.529920
+------------------------------------------------------------
+
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+
+
+============================================================
+END OF FILE: postcss.config.js
+============================================================
+
+
+------------------------------------------------------------
+FILE: postcss.config.mjs
+SIZE: 86 bytes
+MODIFIED: 2025-06-27T13:35:06.529920
+------------------------------------------------------------
+
+const config = {
+  plugins: ["@tailwindcss/postcss"],
+};
+
+export default config;
+
+
+============================================================
+END OF FILE: postcss.config.mjs
+============================================================
+
+
+------------------------------------------------------------
+FILE: README.md
+SIZE: 1486 bytes
+MODIFIED: 2025-06-27T13:35:06.513354
+------------------------------------------------------------
+
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+============================================================
+END OF FILE: README.md
+============================================================
+
+
+------------------------------------------------------------
+FILE: tailwind.config.js
+SIZE: 2840 bytes
+MODIFIED: 2025-06-27T13:35:06.545051
+------------------------------------------------------------
+
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  darkMode: ["class"],
+  content: [
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
+  ],
+  theme: {
+  	container: {
+  		center: true,
+  		padding: '2rem',
+  		screens: {
+  			'2xl': '1400px'
+  		}
+  	},
+  	extend: {
+  		colors: {
+  			border: 'hsl(var(--border))',
+  			input: 'hsl(var(--input))',
+  			ring: 'hsl(var(--ring))',
+  			background: 'hsl(var(--background))',
+  			foreground: 'hsl(var(--foreground))',
+  			primary: {
+  				DEFAULT: 'hsl(var(--primary))',
+  				foreground: 'hsl(var(--primary-foreground))'
+  			},
+  			secondary: {
+  				DEFAULT: 'hsl(var(--secondary))',
+  				foreground: 'hsl(var(--secondary-foreground))'
+  			},
+  			destructive: {
+  				DEFAULT: 'hsl(var(--destructive))',
+  				foreground: 'hsl(var(--destructive-foreground))'
+  			},
+  			muted: {
+  				DEFAULT: 'hsl(var(--muted))',
+  				foreground: 'hsl(var(--muted-foreground))'
+  			},
+  			accent: {
+  				DEFAULT: 'hsl(var(--accent))',
+  				foreground: 'hsl(var(--accent-foreground))'
+  			},
+  			popover: {
+  				DEFAULT: 'hsl(var(--popover))',
+  				foreground: 'hsl(var(--popover-foreground))'
+  			},
+  			card: {
+  				DEFAULT: 'hsl(var(--card))',
+  				foreground: 'hsl(var(--card-foreground))'
+  			},
+  			mccall: {
+  				navy: 'hsl(var(--mccall-navy))',
+  				'mid-blue': 'hsl(var(--mccall-mid-blue))',
+  				green: 'hsl(var(--mccall-green))',
+  				'light-green': 'hsl(var(--mccall-light-green))',
+  				gold: 'hsl(var(--mccall-gold))',
+  				'light-gold': 'hsl(var(--mccall-light-gold))',
+  				beige: 'hsl(var(--mccall-beige))',
+  				cream: 'hsl(var(--mccall-cream))'
+  			},
+  			chart: {
+  				'1': 'hsl(var(--chart-1))',
+  				'2': 'hsl(var(--chart-2))',
+  				'3': 'hsl(var(--chart-3))',
+  				'4': 'hsl(var(--chart-4))',
+  				'5': 'hsl(var(--chart-5))'
+  			}
+  		},
+  		borderRadius: {
+  			lg: 'var(--radius)',
+  			md: 'calc(var(--radius) - 2px)',
+  			sm: 'calc(var(--radius) - 4px)'
+  		},
+  		keyframes: {
+  			'accordion-down': {
+  				from: {
+  					height: 0
+  				},
+  				to: {
+  					height: 'var(--radix-accordion-content-height)'
+  				}
+  			},
+  			'accordion-up': {
+  				from: {
+  					height: 'var(--radix-accordion-content-height)'
+  				},
+  				to: {
+  					height: 0
+  				}
+  			}
+  		},
+  		animation: {
+  			'accordion-down': 'accordion-down 0.2s ease-out',
+  			'accordion-up': 'accordion-up 0.2s ease-out'
+  		},
+  		fontFamily: {
+  			sans: [
+  				'acumin-pro',
+  				'Acumen',
+  				'Roboto',
+  				'-apple-system',
+  				'BlinkMacSystemFont',
+  				'Segoe UI',
+  				'sans-serif'
+  			]
+  		}
+  	}
+  },
+  plugins: [require("tailwindcss-animate")],
+}
+
+============================================================
+END OF FILE: tailwind.config.js
+============================================================
+
+
+------------------------------------------------------------
+FILE: tsconfig.json
+SIZE: 644 bytes
+MODIFIED: 2025-06-27T13:35:06.546580
+------------------------------------------------------------
+
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "baseUrl": ".",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+
+============================================================
+END OF FILE: tsconfig.json
+============================================================
+
+
+------------------------------------------------------------
+FILE: vercel.json
+SIZE: 135 bytes
+MODIFIED: 2025-06-27T13:35:06.546580
+------------------------------------------------------------
+
+{
+  "framework": "nextjs",
+  "regions": ["iad1"],
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 10
+    }
+  }
+}
+
+============================================================
+END OF FILE: vercel.json
+============================================================
+
+
+--- End of root directory (15 files) ---
+
+
+==================== APP DIRECTORY ====================
+
+
+------------------------------------------------------------
+FILE: app/admin/login/page.tsx
+SIZE: 4898 bytes
+MODIFIED: 2025-06-27T13:35:06.513354
+------------------------------------------------------------
+
+// app/admin/login/page.tsx
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { LogoHeader } from '@/components/ui/logo-header'
+
+export default function AdminLogin() {
+  const [credentials, setCredentials] = useState({ username: '', password: '' })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const router = useRouter()
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/test-auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'login',
+          username: credentials.username,
+          password: credentials.password,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Login successful, redirect to admin dashboard
+        router.push('/admin')
+        router.refresh()
+      } else {
+        setError(result.message || 'Login failed')
+      }
+    } catch (err) {
+      setError('An error occurred during login')
+      console.error('Login error:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-mccall-cream flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="bg-mccall-gradient-blue rounded-2xl p-8 mb-6">
+            <LogoHeader className="justify-center mb-4" />
+            <h1 className="text-3xl font-bold text-white">Admin Portal</h1>
+            <p className="text-white/90 text-lg">Event Management System</p>
+          </div>
+        </div>
+
+        <Card className="shadow-lg border-0">
+          <CardHeader className="text-center pb-2">
+            <CardTitle className="text-2xl text-mccall-navy">Sign In</CardTitle>
+            <p className="text-gray-600 text-sm">Enter your credentials to access the admin dashboard</p>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4" suppressHydrationWarning>
+              {error && (
+                <div className="p-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">
+                  {error}
+                </div>
+              )}
+              
+              <div suppressHydrationWarning>
+                <label htmlFor="username" className="block text-sm font-medium text-mccall-navy mb-1">
+                  Username
+                </label>
+                <input
+                  id="username"
+                  type="text"
+                  required
+                  value={credentials.username}
+                  onChange={(e) => setCredentials(prev => ({ ...prev, username: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mccall-green focus:border-transparent transition-colors"
+                  disabled={loading}
+                  suppressHydrationWarning
+                />
+              </div>
+
+              <div suppressHydrationWarning>
+                <label htmlFor="password" className="block text-sm font-medium text-mccall-navy mb-1">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  required
+                  value={credentials.password}
+                  onChange={(e) => setCredentials(prev => ({ ...prev, password: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mccall-green focus:border-transparent transition-colors"
+                  disabled={loading}
+                  suppressHydrationWarning
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-mccall-navy hover:bg-mccall-navy/90 text-white font-semibold py-3 text-lg rounded-lg transition-colors"
+                disabled={loading}
+              >
+                {loading ? 'Signing in...' : 'Sign In'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        <div className="text-center mt-8">
+          <Link 
+            href="/"
+            className="text-mccall-navy hover:text-mccall-green transition-colors text-sm font-medium"
+          >
+            ← Back to Events
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+============================================================
+END OF FILE: app/admin/login/page.tsx
+============================================================
+
+
+------------------------------------------------------------
+FILE: app/admin/page.tsx
+SIZE: 30204 bytes
+MODIFIED: 2025-06-27T14:48:43.612099
+------------------------------------------------------------
+
+// Updated app/admin/page.tsx with archive functionality
+
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
+import { LogoHeader } from '@/components/ui/logo-header'
+import { TrainingFilter } from '@/components/training-filter'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import type { Event } from '@/lib/types'
+import { formatDate, formatTimeRange, getEventCounts, isEventArchived } from '@/lib/utils'
+import { MapPin, Clock, Trash2, Plus, RefreshCw, Edit2, LogOut, User, Archive, Calendar } from 'lucide-react'
+
+interface EventFormData {
+  title: string
+  date: string
+  startTime: string
+  endTime: string
+  location: string
+  street: string
+  town: string
+  state: string
+  zip: string
+  trainingType: 'MHFA' | 'QPR'
+  language: 'en' | 'es'
+  googleFormBaseUrl: string
+  dateEntryId: string
+  locationEntryId: string
+}
+
+const emptyFormData: EventFormData = {
+  title: '',
+  date: '',
+  startTime: '',
+  endTime: '',
+  location: '',
+  street: '',
+  town: 'Torrington',
+  state: 'CT',
+  zip: '06790',
+  trainingType: 'MHFA',
+  language: 'en',
+  googleFormBaseUrl: '',
+  dateEntryId: '',
+  locationEntryId: ''
+}
+
+export default function AdminDashboard() {
+  const [events, setEvents] = useState<Event[]>([])
+  const [loading, setLoading] = useState(true)
+  const [message, setMessage] = useState<string>('')
+  const [activeFilter, setActiveFilter] = useState<'all' | 'MHFA' | 'QPR'>('all')
+  const [archiveView, setArchiveView] = useState<'active' | 'archived'>('active')
+  
+  // Modal and form state
+  const [showModal, setShowModal] = useState(false)
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null)
+  const [formData, setFormData] = useState<EventFormData>(emptyFormData)
+  const [formLoading, setFormLoading] = useState(false)
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+
+  const fetchEvents = async () => {
+    try {
+      const url = archiveView === 'archived' 
+        ? '/api/events?archived=true' 
+        : '/api/events'
+      
+      const response = await fetch(url)
+      const data = await response.json()
+      setEvents(data.events || [])
+    } catch (error) {
+      console.error('Failed to fetch events:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchEvents()
+  }, [archiveView])
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/test-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'logout' })
+      })
+      window.location.href = '/admin/login'
+    } catch (error) {
+      console.error('Logout error:', error)
+    }
+  }
+
+  const deleteEvent = async (eventId: string) => {
+    if (!confirm('Are you sure you want to delete this event? This action cannot be undone.')) return
+
+    try {
+      const response = await fetch(`/api/events/${eventId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        setMessage(`Event deleted successfully!`)
+        fetchEvents()
+        setTimeout(() => setMessage(''), 3000)
+      } else {
+        const error = await response.json()
+        setMessage(`Error: ${error.error}`)
+      }
+    } catch (error) {
+      setMessage(`Error: ${error}`)
+    }
+  }
+
+  const openCreateModal = () => {
+    setEditingEvent(null)
+    setFormData(emptyFormData)
+    setFormErrors({})
+    setShowModal(true)
+  }
+
+  const openEditModal = (event: Event) => {
+    setEditingEvent(event)
+    
+    // Parse existing address or use defaults
+    const addressParts = event.address ? event.address.split(', ') : []
+    const street = addressParts[0] || ''
+    const town = addressParts[1] || 'Torrington'
+    const stateZip = addressParts[2] || 'CT 06790'
+    const [state, zip] = stateZip.split(' ')
+    
+    setFormData({
+      title: event.title,
+      date: event.date,
+      startTime: event.startTime,
+      endTime: event.endTime,
+      location: event.location,
+      street: street,
+      town: town,
+      state: state || 'CT',
+      zip: zip || '06790',
+      trainingType: event.trainingType,
+      language: event.language,
+      googleFormBaseUrl: event.googleFormBaseUrl || '',
+      dateEntryId: event.dateEntryId || '',
+      locationEntryId: event.locationEntryId || ''
+    })
+    setFormErrors({})
+    setShowModal(true)
+  }
+
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {}
+    
+    if (!formData.title.trim()) errors.title = 'Title is required'
+    if (!formData.date) errors.date = 'Date is required'
+    if (!formData.startTime) errors.startTime = 'Start time is required'
+    if (!formData.endTime) errors.endTime = 'End time is required'
+    if (!formData.location.trim()) errors.location = 'Location is required'
+    
+    // Validate time range
+    if (formData.startTime && formData.endTime && formData.startTime >= formData.endTime) {
+      errors.endTime = 'End time must be after start time'
+    }
+    
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!validateForm()) return
+    
+    setFormLoading(true)
+    
+    try {
+      // Combine address fields into a single address string
+      const address = formData.street.trim() 
+        ? `${formData.street}, ${formData.town}, ${formData.state} ${formData.zip}`
+        : ''
+      
+      const eventData = {
+        title: formData.title,
+        date: formData.date,
+        startTime: formData.startTime,
+        endTime: formData.endTime,
+        location: formData.location,
+        address: address,
+        trainingType: formData.trainingType,
+        language: formData.language,
+        googleFormBaseUrl: formData.googleFormBaseUrl,
+        dateEntryId: formData.dateEntryId,
+        locationEntryId: formData.locationEntryId
+      }
+      
+      const url = editingEvent ? `/api/events/${editingEvent.id}` : '/api/events'
+      const method = editingEvent ? 'PUT' : 'POST'
+      
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(eventData)
+      })
+
+      if (response.ok) {
+        setMessage(editingEvent ? 'Event updated successfully!' : `Event created successfully!`)
+        setShowModal(false)
+        fetchEvents()
+        setTimeout(() => setMessage(''), 3000)
+      } else {
+        const error = await response.json()
+        setMessage(`Error: ${error.error}`)
+      }
+    } catch (error) {
+      setMessage(`Error: ${error}`)
+    } finally {
+      setFormLoading(false)
+    }
+  }
+
+  // Get event counts for both active and archived
+  const eventCounts = getEventCounts(events)
+  const currentCounts = archiveView === 'archived' ? eventCounts.archived : eventCounts.active
+
+  const filteredEvents = events.filter(event => 
+    activeFilter === 'all' || event.trainingType === activeFilter
+  )
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-mccall-cream">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-mccall-navy border-t-transparent mx-auto"></div>
+              <p className="mt-4 text-mccall-navy font-medium">Loading admin dashboard...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-mccall-cream">
+      {/* Header */}
+      <div className="bg-mccall-gradient-blue">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-between items-start mb-6">
+            <LogoHeader />
+            <div className="flex items-center gap-4 text-white">
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4" />
+                <span className="text-sm">Logged in as: admin</span>
+              </div>
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                size="sm"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              >
+                <LogOut className="w-4 h-4 mr-1" />
+                Logout
+              </Button>
+            </div>
+          </div>
+          
+          <div className="text-center text-white">
+            <h1 className="text-4xl font-bold mb-2 text-white">Admin Dashboard</h1>
+            <p className="text-xl text-white/90">Event Management System</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Archive Toggle */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-mccall-navy">View Mode</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-4">
+              <Button
+                onClick={() => setArchiveView('active')}
+                variant={archiveView === 'active' ? 'default' : 'outline'}
+                className={`rounded-full px-6 py-2 font-semibold transition-all ${
+                  archiveView === 'active'
+                    ? 'bg-mccall-navy hover:bg-mccall-navy/90 text-white'
+                    : 'border-mccall-navy text-mccall-navy hover:bg-mccall-navy hover:text-white'
+                }`}
+              >
+                <Calendar className="w-4 h-4 mr-2" />
+                Active Events
+              </Button>
+              <Button
+                onClick={() => setArchiveView('archived')}
+                variant={archiveView === 'archived' ? 'default' : 'outline'}
+                className={`rounded-full px-6 py-2 font-semibold transition-all ${
+                  archiveView === 'archived'
+                    ? 'bg-gray-600 hover:bg-gray-700 text-white'
+                    : 'border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white'
+                }`}
+              >
+                <Archive className="w-4 h-4 mr-2" />
+                Archived Events
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Action Buttons - Only show Create for active events */}
+        {archiveView === 'active' && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-mccall-navy">Event Management</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-4">
+                <Dialog open={showModal} onOpenChange={setShowModal}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      onClick={openCreateModal}
+                      className="bg-mccall-green hover:bg-mccall-green/90 text-white rounded-full"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Event
+                    </Button>
+                  </DialogTrigger>
+                  
+                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle className="text-mccall-navy">
+                        {editingEvent ? 'Edit Event' : 'Create New Event'}
+                      </DialogTitle>
+                    </DialogHeader>
+                    
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Title - Full Width */}
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-mccall-navy mb-1">
+                            Event Title *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.title}
+                            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mccall-green"
+                            placeholder="Mental Health First Aid Training"
+                          />
+                          {formErrors.title && <p className="text-red-600 text-xs mt-1">{formErrors.title}</p>}
+                        </div>
+
+                        {/* Training Type */}
+                        <div>
+                          <label className="block text-sm font-medium text-mccall-navy mb-1">
+                            Training Type *
+                          </label>
+                          <select
+                            value={formData.trainingType}
+                            onChange={(e) => setFormData(prev => ({ ...prev, trainingType: e.target.value as 'MHFA' | 'QPR' }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mccall-green"
+                          >
+                            <option value="MHFA">MHFA</option>
+                            <option value="QPR">QPR</option>
+                          </select>
+                        </div>
+
+                        {/* Language */}
+                        <div>
+                          <label className="block text-sm font-medium text-mccall-navy mb-1">
+                            Language *
+                          </label>
+                          <select
+                            value={formData.language}
+                            onChange={(e) => setFormData(prev => ({ ...prev, language: e.target.value as 'en' | 'es' }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mccall-green"
+                          >
+                            <option value="en">English</option>
+                            <option value="es">Spanish</option>
+                          </select>
+                        </div>
+
+                        {/* Date */}
+                        <div>
+                          <label className="block text-sm font-medium text-mccall-navy mb-1">
+                            Date *
+                          </label>
+                          <input
+                            type="date"
+                            value={formData.date}
+                            onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mccall-green"
+                          />
+                          {formErrors.date && <p className="text-red-600 text-xs mt-1">{formErrors.date}</p>}
+                        </div>
+
+                        {/* Time Range */}
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-sm font-medium text-mccall-navy mb-1">
+                              Start Time *
+                            </label>
+                            <input
+                              type="time"
+                              value={formData.startTime}
+                              onChange={(e) => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mccall-green"
+                            />
+                            {formErrors.startTime && <p className="text-red-600 text-xs mt-1">{formErrors.startTime}</p>}
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-mccall-navy mb-1">
+                              End Time *
+                            </label>
+                            <input
+                              type="time"
+                              value={formData.endTime}
+                              onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mccall-green"
+                            />
+                            {formErrors.endTime && <p className="text-red-600 text-xs mt-1">{formErrors.endTime}</p>}
+                          </div>
+                        </div>
+
+                        {/* Location */}
+                        <div>
+                          <label className="block text-sm font-medium text-mccall-navy mb-1">
+                            Location Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.location}
+                            onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mccall-green"
+                            placeholder="Community Center"
+                          />
+                          {formErrors.location && <p className="text-red-600 text-xs mt-1">{formErrors.location}</p>}
+                        </div>
+
+                        {/* Address Fields */}
+                        <div className="md:col-span-2">
+                          <h3 className="text-lg font-medium text-mccall-navy mb-3">Address</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div className="md:col-span-4">
+                              <label className="block text-sm font-medium text-mccall-navy mb-1">
+                                Street Address
+                              </label>
+                              <input
+                                type="text"
+                                value={formData.street}
+                                onChange={(e) => setFormData(prev => ({ ...prev, street: e.target.value }))}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mccall-green"
+                                placeholder="123 Main Street"
+                              />
+                            </div>
+                            <div className="md:col-span-2">
+                              <label className="block text-sm font-medium text-mccall-navy mb-1">
+                                Town/City
+                              </label>
+                              <input
+                                type="text"
+                                value={formData.town}
+                                onChange={(e) => setFormData(prev => ({ ...prev, town: e.target.value }))}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mccall-green"
+                                placeholder="Torrington"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-mccall-navy mb-1">
+                                State
+                              </label>
+                              <input
+                                type="text"
+                                value={formData.state}
+                                onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mccall-green"
+                                placeholder="CT"
+                                maxLength={2}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-mccall-navy mb-1">
+                                ZIP Code
+                              </label>
+                              <input
+                                type="text"
+                                value={formData.zip}
+                                onChange={(e) => setFormData(prev => ({ ...prev, zip: e.target.value }))}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mccall-green"
+                                placeholder="06790"
+                                maxLength={5}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-4 pt-4">
+                        <Button
+                          type="submit"
+                          disabled={formLoading}
+                          className="bg-mccall-navy hover:bg-mccall-navy/90 text-white"
+                        >
+                          {formLoading ? 'Saving...' : (editingEvent ? 'Update Event' : 'Create Event')}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setShowModal(false)}
+                          disabled={formLoading}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+                
+                <Button 
+                  onClick={fetchEvents}
+                  variant="outline"
+                  className="border-mccall-navy text-mccall-navy hover:bg-mccall-navy hover:text-white rounded-full"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh Events
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Status Message */}
+        {message && (
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-green-800">{message}</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Stats & Filter */}
+        <div className="mb-6 space-y-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div>
+                  <p className="text-3xl font-bold text-mccall-navy">{currentCounts.total}</p>
+                  <p className="text-sm text-gray-600">
+                    {archiveView === 'archived' ? 'Archived' : 'Active'} Events
+                  </p>
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-mccall-green">{currentCounts.MHFA}</p>
+                  <p className="text-sm text-gray-600">MHFA Events</p>
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-mccall-green">{currentCounts.QPR}</p>
+                  <p className="text-sm text-gray-600">QPR Events</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <h2 className="text-xl font-semibold text-mccall-navy">
+                  {archiveView === 'archived' ? 'Archived' : 'Active'} Events ({filteredEvents.length} shown)
+                </h2>
+                <TrainingFilter
+                  activeFilter={activeFilter}
+                  onFilterChange={setActiveFilter}
+                  currentLanguage="en"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Events Grid */}
+        {filteredEvents.length === 0 ? (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-12">
+                <p className="text-gray-600 text-lg">
+                  {archiveView === 'archived' 
+                    ? 'No archived events found.' 
+                    : 'No active events found. Create your first event to get started.'
+                  }
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredEvents.map((event) => {
+              const isArchived = isEventArchived(event.date)
+              
+              return (
+                <Card key={event.id} className={`border-0 shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden ${
+                  isArchived ? 'opacity-75' : ''
+                }`}>
+                  {/* Top accent bar */}
+                  <div className={`h-2 ${
+                    event.trainingType === 'MHFA' ? 'bg-mccall-gradient-blue' : 'bg-mccall-gradient-green'
+                  }`} />
+                  
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-lg text-mccall-navy mb-2 truncate">{event.title}</CardTitle>
+                        <div className="text-xs text-gray-500 mb-3">ID: {event.id}</div>
+                        <div className="flex items-center gap-2 text-gray-600 text-sm mb-2">
+                          <Clock className="w-4 h-4 flex-shrink-0" />
+                          <span className="truncate">{formatDate(event.date)}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600 text-sm mb-2">
+                          <Clock className="w-4 h-4 flex-shrink-0" />
+                          <span>{formatTimeRange(event.startTime, event.endTime)}</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <MapPin className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-gray-700 truncate">{event.location}</p>
+                            {event.address && (
+                              <p className="text-xs text-gray-600 truncate">{event.address}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col items-end gap-2">
+                        <span className={`px-3 py-1 text-xs font-bold rounded-full ${
+                          event.trainingType === "MHFA" 
+                            ? "bg-mccall-navy text-white" 
+                            : "bg-mccall-green text-white"
+                        }`}>
+                          {event.trainingType}
+                        </span>
+                        
+                        <span className={`px-2 py-1 text-xs rounded-full ${
+                          event.language === "en" 
+                            ? "bg-blue-100 text-blue-800" 
+                            : "bg-green-100 text-green-800"
+                        }`}>
+                          {event.language === "en" ? "EN" : "ES"}
+                        </span>
+
+                        {isArchived && (
+                          <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">
+                            ARCHIVED
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  
+                  <CardFooter className="pt-0 pb-4">
+                    <div className="flex gap-2 w-full">
+                      <Button
+                        onClick={() => openEditModal(event)}
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400"
+                        disabled={archiveView === 'archived'}
+                      >
+                        <Edit2 className="w-4 h-4 mr-1" />
+                        {archiveView === 'archived' ? 'View' : 'Edit'}
+                      </Button>
+                      <Button
+                        onClick={() => deleteEvent(event.id)}
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
+                  </CardFooter>
+                </Card>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+============================================================
+END OF FILE: app/admin/page.tsx
+============================================================
+
+
+------------------------------------------------------------
+FILE: app/api/events/[id]/route.ts
+SIZE: 2194 bytes
+MODIFIED: 2025-06-27T13:35:06.513354
+------------------------------------------------------------
+
+export const runtime = 'nodejs' // 🚨 CRITICAL: Required for Redis
+
+import { NextRequest, NextResponse } from 'next/server'
+import { EventDatabase } from '@/lib/db/redis-client'
+
+interface RouteContext {
+  params: Promise<{ id: string }> // ← Changed to Promise!
+}
+
+// GET /api/events/[id] - Get single event
+export async function GET(
+  request: NextRequest,
+  { params }: RouteContext
+) {
+  try {
+    const { id } = await params // ← Added await!
+    const event = await EventDatabase.getEventById(id)
+    
+    if (!event) {
+      return NextResponse.json(
+        { error: 'Event not found' },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json({ event })
+  } catch (error) {
+    console.error('API Error:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch event' },
+      { status: 500 }
+    )
+  }
+}
+
+// PUT /api/events/[id] - Update event
+export async function PUT(
+  request: NextRequest,
+  { params }: RouteContext
+) {
+  try {
+    const { id } = await params // ← Added await!
+    const body = await request.json()
+    const updatedEvent = await EventDatabase.updateEvent(id, body)
+    
+    if (!updatedEvent) {
+      return NextResponse.json(
+        { error: 'Event not found' },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json({ event: updatedEvent })
+  } catch (error) {
+    console.error('API Error:', error)
+    return NextResponse.json(
+      { error: 'Failed to update event' },
+      { status: 500 }
+    )
+  }
+}
+
+// DELETE /api/events/[id] - Delete event
+export async function DELETE(
+  request: NextRequest,
+  { params }: RouteContext
+) {
+  try {
+    const { id } = await params // ← Added await!
+    const success = await EventDatabase.deleteEvent(id)
+    
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Event not found' },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json({ message: 'Event deleted successfully' })
+  } catch (error) {
+    console.error('API Error:', error)
+    return NextResponse.json(
+      { error: 'Failed to delete event' },
+      { status: 500 }
+    )
+  }
+}
+
+============================================================
+END OF FILE: app/api/events/[id]/route.ts
+============================================================
+
+
+------------------------------------------------------------
+FILE: app/api/events/route.ts
+SIZE: 2638 bytes
+MODIFIED: 2025-06-27T13:35:06.513354
+------------------------------------------------------------
+
+// Update app/api/events/route.ts
+
+export const runtime = 'nodejs' // 🚨 CRITICAL: Required for Redis
+
+import { NextRequest, NextResponse } from 'next/server'
+import { EventDatabase } from '@/lib/db/redis-client'
+import { seedDatabaseIfEmpty } from '@/lib/db/seed'
+import { filterEventsByArchiveStatus } from '@/lib/utils'
+
+// GET /api/events - Get all events with optional archive filtering
+export async function GET(request: NextRequest) {
+  try {
+    // Ensure database is seeded on first run
+    await seedDatabaseIfEmpty()
+    
+    const { searchParams } = new URL(request.url)
+    const includeArchived = searchParams.get('includeArchived') === 'true'
+    const showOnlyArchived = searchParams.get('archived') === 'true'
+    
+    const allEvents = await EventDatabase.getAllEvents()
+    
+    let events = allEvents
+    
+    if (showOnlyArchived) {
+      // Show only archived events
+      events = filterEventsByArchiveStatus(allEvents, true)
+    } else if (!includeArchived) {
+      // Show only active events (default behavior)
+      events = filterEventsByArchiveStatus(allEvents, false)
+    }
+    // If includeArchived=true and archived is not specified, show all events
+    
+    return NextResponse.json({ 
+      events, 
+      count: events.length,
+      totalCount: allEvents.length
+    })
+  } catch (error) {
+    console.error('API Error:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch events' },
+      { status: 500 }
+    )
+  }
+}
+
+// POST /api/events - Create new event (unchanged)
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    
+    // Validate required fields
+    const requiredFields = ['title', 'date', 'startTime', 'endTime', 'location', 'trainingType', 'language', 'googleFormBaseUrl']
+    for (const field of requiredFields) {
+      if (!body[field]) {
+        return NextResponse.json(
+          { error: `Missing required field: ${field}` },
+          { status: 400 }
+        )
+      }
+    }
+
+    const eventData = {
+      ...body,
+      isActive: body.isActive ?? true,
+      timeZone: body.timeZone ?? 'America/Denver',
+      dateEntryId: body.dateEntryId ?? 'entry.123456789',
+      locationEntryId: body.locationEntryId ?? 'entry.987654321',
+    }
+
+    const newEvent = await EventDatabase.createEvent(eventData)
+    
+    return NextResponse.json({ event: newEvent }, { status: 201 })
+  } catch (error) {
+    console.error('API Error:', error)
+    return NextResponse.json(
+      { error: 'Failed to create event' },
+      { status: 500 }
+    )
+  }
+}
+
+============================================================
+END OF FILE: app/api/events/route.ts
+============================================================
+
+
+------------------------------------------------------------
+FILE: app/api/test-auth/route.ts
+SIZE: 3020 bytes
+MODIFIED: 2025-06-27T13:35:06.513354
+------------------------------------------------------------
+
+// app/api/test-auth/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { 
+  validateCredentials, 
+  createSession, 
+  verifySession,
+  setSessionCookie,
+  clearSessionCookie 
+} from '@/lib/auth-simple'
+
+export const runtime = 'nodejs' // Required for server-side auth functions
+
+export async function POST(request: NextRequest) {
+  try {
+    const { action, username, password, token } = await request.json()
+
+    switch (action) {
+      case 'validate':
+        // Test credential validation
+        const isValid = validateCredentials(username, password)
+        return NextResponse.json({ 
+          success: true, 
+          isValid,
+          message: isValid ? 'Credentials valid' : 'Credentials invalid'
+        })
+
+      case 'login':
+        // Test full login flow
+        if (!validateCredentials(username, password)) {
+          return NextResponse.json({ 
+            success: false, 
+            message: 'Invalid credentials' 
+          }, { status: 401 })
+        }
+
+        const sessionToken = await createSession(username)
+        const response = NextResponse.json({ 
+          success: true, 
+          message: 'Login successful',
+          hasToken: !!sessionToken
+        })
+        
+        setSessionCookie(response, sessionToken)
+        return response
+
+      case 'verify':
+        // Test token verification
+        if (!token) {
+          return NextResponse.json({ 
+            success: false, 
+            message: 'No token provided' 
+          })
+        }
+
+        const sessionData = await verifySession(token)
+        return NextResponse.json({ 
+          success: true, 
+          isValid: !!sessionData,
+          sessionData: sessionData || null
+        })
+
+      case 'logout':
+        // Test logout flow
+        const logoutResponse = NextResponse.json({ 
+          success: true, 
+          message: 'Logged out successfully' 
+        })
+        
+        clearSessionCookie(logoutResponse)
+        return logoutResponse
+
+      default:
+        return NextResponse.json({ 
+          success: false, 
+          message: 'Invalid action. Use: validate, login, verify, or logout' 
+        }, { status: 400 })
+    }
+
+  } catch (error) {
+    console.error('Auth test error:', error)
+    return NextResponse.json({ 
+      success: false, 
+      message: 'Internal server error',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
+  }
+}
+
+export async function GET() {
+  return NextResponse.json({
+    message: 'Auth test endpoint - Use POST with action parameter',
+    availableActions: ['validate', 'login', 'verify', 'logout'],
+    example: {
+      validate: { action: 'validate', username: 'admin', password: 'your_password' },
+      login: { action: 'login', username: 'admin', password: 'your_password' },
+      verify: { action: 'verify', token: 'your_jwt_token' },
+      logout: { action: 'logout' }
+    }
+  })
+}
+
+============================================================
+END OF FILE: app/api/test-auth/route.ts
+============================================================
+
+
+------------------------------------------------------------
+FILE: app/api/test-db/route.ts
+SIZE: 731 bytes
+MODIFIED: 2025-06-27T13:35:06.513354
+------------------------------------------------------------
+
+// app/api/test-db/route.ts
+export const runtime = 'nodejs'           // ⬅ important!
+
+import { NextResponse } from 'next/server'
+import { EventDatabase } from '@/lib/db/redis-client'
+
+export async function GET() {
+  try {
+    // Test basic connection
+    const events = await EventDatabase.getAllEvents()
+
+    return NextResponse.json({
+      success: true,
+      message: 'Redis Cloud is working!',
+      eventCount: events.length,
+      redisUrl: process.env.REDIS_URL ? 'Set correctly' : 'Missing',
+    })
+  } catch (error) {
+    console.error('Database test failed:', error)
+    return NextResponse.json(
+      { success: false, error: (error as Error).message },
+      { status: 500 },
+    )
+  }
+}
+
+
+============================================================
+END OF FILE: app/api/test-db/route.ts
+============================================================
+
+
+------------------------------------------------------------
+FILE: app/globals.css
+SIZE: 3633 bytes
+MODIFIED: 2025-06-27T13:35:06.513354
+------------------------------------------------------------
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* McCall Brand Colors */
+    --mccall-navy: 206 100% 17%; /* #003057 */
+    --mccall-mid-blue: 203 90% 24%; /* #054a76 */
+    --mccall-green: 84 100% 37%; /* #80bc00 */
+    --mccall-light-green: 79 57% 55%; /* #bcd63e */
+    --mccall-gold: 41 100% 58%; /* #ffc629 */
+    --mccall-light-gold: 34 95% 61%; /* #fbac40 */
+    --mccall-beige: 60 29% 94%; /* #f5f2e8 */
+    --mccall-cream: 47 31% 93%; /* #f4eee1 */
+    
+    /* System Colors mapped to McCall brand */
+    --background: 0 0% 100%; /* cream background */
+    --foreground: 0 0% 3.9%; /* navy text */
+    --card: 0 0% 100%; /* white cards */
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%; /* navy */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%; /* green */
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%; /* beige */
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%; /* gold */
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%; /* green focus */
+    --radius: 0.5rem; /* McCall uses rounded corners */ --chart-1: 12 76% 61%; --chart-2: 173 58% 39%; --chart-3: 197 37% 24%; --chart-4: 43 74% 66%; --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    /* Keep dark mode minimal for MVP */
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: "acumin-pro", Acumen, Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.5em;
+    color: rgba(0, 48, 87, 0.75); /* McCall's specific text opacity */
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold text-mccall-navy;
+    line-height: 1.2;
+  }
+}
+
+/* McCall-specific utility classes */
+@layer utilities {
+  .bg-mccall-gradient-blue {
+    background: linear-gradient(40deg, hsl(var(--mccall-navy)) 0%, hsl(var(--mccall-mid-blue)) 100%);
+  }
+  
+  .bg-mccall-gradient-green {
+    background: linear-gradient(40deg, hsl(var(--mccall-green)) 0%, hsl(var(--mccall-light-green)) 100%);
+  }
+  
+  .bg-mccall-gradient-gold {
+    background: linear-gradient(40deg, hsl(var(--mccall-light-gold)) 0%, hsl(var(--mccall-gold)) 100%);
+  }
+  
+  .text-mccall-navy {
+    color: hsl(var(--mccall-navy));
+  }
+  
+  .text-mccall-green {
+    color: hsl(var(--mccall-green));
+  }
+  
+  .bg-mccall-navy {
+    background-color: hsl(var(--mccall-navy));
+  }
+  
+  .bg-mccall-green {
+    background-color: hsl(var(--mccall-green));
+  }
+  
+  .bg-mccall-beige {
+    background-color: hsl(var(--mccall-beige));
+  }
+  
+  .bg-mccall-cream {
+    background-color: hsl(var(--mccall-cream));
+  }
+}
+
+============================================================
+END OF FILE: app/globals.css
+============================================================
+
+
+------------------------------------------------------------
+FILE: app/layout.tsx
+SIZE: 610 bytes
+MODIFIED: 2025-06-27T13:35:06.513354
+------------------------------------------------------------
+
+import type { Metadata } from "next";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "McCall Prevention Services - Mental Health Training Programs",
+  description: "Register for Mental Health First Aid (MHFA) and QPR suicide prevention trainings offered by McCall Behavioral Health Network.",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className="antialiased" suppressHydrationWarning>
+        {children}
+      </body>
+    </html>
+  );
+}
+
+
+============================================================
+END OF FILE: app/layout.tsx
+============================================================
+
+
+------------------------------------------------------------
+FILE: app/page.tsx
+SIZE: 7301 bytes
+MODIFIED: 2025-06-27T14:48:43.612099
+------------------------------------------------------------
+
+// Updated app/page.tsx - Frontend with automatic archiving
+
+"use client";
+
+import { EventCard } from "@/components/event-card";
+import { TrainingFilter } from "@/components/training-filter";
+import { LogoHeader } from "@/components/ui/logo-header";
+import { LanguageToggle } from "@/components/ui/language-toggle";
+import { useState, useEffect } from "react";
+import type { Event } from '@/lib/types'
+
+type FilterOption = "all" | "MHFA" | "QPR";
+
+export default function Home() {
+  // API data loading
+  const [events, setEvents] = useState<Event[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Keep your existing state
+  const [activeFilter, setActiveFilter] = useState<FilterOption>("all");
+  const [currentLanguage, setCurrentLanguage] = useState<"en" | "es">("en");
+
+  // Fetch only ACTIVE events from API (automatic archiving)
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        setLoading(true)
+        // No archive parameters = only active events returned
+        const response = await fetch('/api/events')
+        if (!response.ok) {
+          throw new Error('Failed to fetch events')
+        }
+        const data = await response.json()
+        setEvents(data.events || [])
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load events')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchEvents()
+  }, [])
+
+  // Keep your existing filtering logic - events are already filtered to active ones
+  const filteredEvents = events
+    .filter(event => event.language === currentLanguage)
+    .filter(event => activeFilter === "all" || event.trainingType === activeFilter);
+
+  // Keep your existing handler
+  const handleLanguageChange = (language: "en" | "es") => {
+    setCurrentLanguage(language);
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#f5f2e8] to-[#f4eee1]">
+        <header className="bg-[#003057] text-white">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <LogoHeader className="mr-4 sm:mr-6" />   
+              <LanguageToggle onLanguageChange={handleLanguageChange} />
+            </div>
+          </div>
+        </header>
+        <div className="bg-gradient-to-r from-[#003057] to-[#054a76] text-white py-12">
+          <div className="container mx-auto px-4 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+            <p>Loading upcoming events...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state  
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#f5f2e8] to-[#f4eee1]">
+        <header className="bg-[#003057] text-white">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <LogoHeader className="mr-4 sm:mr-6" />   
+              <LanguageToggle onLanguageChange={handleLanguageChange} />
+            </div>
+          </div>
+        </header>
+        <div className="bg-gradient-to-r from-[#003057] to-[#054a76] text-white py-12">
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="text-2xl font-bold mb-4">Error Loading Events</h1>
+            <p>{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 bg-white text-[#003057] px-4 py-2 rounded hover:bg-gray-100"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Main page render
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#f5f2e8] to-[#f4eee1]">
+      {/* Header with McCall branding */}
+      <header className="bg-[#003057] text-white">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <LogoHeader className="mr-4 sm:mr-6" />   
+            <LanguageToggle onLanguageChange={handleLanguageChange} />
+          </div>
+        </div>
+      </header>
+
+      {/* Hero section */}
+      <div className="bg-gradient-to-r from-[#003057] to-[#054a76] text-white py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">
+              {currentLanguage === "en" 
+                ? "Mental Health Training Programs"
+                : "Programas de Capacitación en Salud Mental"}
+            </h1>
+            <p className="text-xl opacity-90">
+              {currentLanguage === "en"
+                ? "Join us for professional development opportunities in Mental Health First Aid (MHFA) and Question, Persuade, Refer (QPR) suicide prevention training."
+                : "Únase a nosotros para oportunidades de desarrollo profesional en Primeros Auxilios de Salud Mental (MHFA) y capacitación en prevención del suicidio Preguntar, Persuadir, Referir (QPR)."}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter section */}
+      <div className="bg-white shadow-sm sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-4">
+          <TrainingFilter 
+            activeFilter={activeFilter} 
+            onFilterChange={setActiveFilter}
+            currentLanguage={currentLanguage}
+          />
+        </div>
+      </div>
+
+      {/* Events grid */}
+      <main className="container mx-auto px-4 py-8">
+        {filteredEvents.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+            <p className="text-lg text-gray-600">
+              {currentLanguage === "en"
+                ? `No upcoming ${activeFilter === "all" ? "" : activeFilter} trainings are currently scheduled.`
+                : `No hay entrenamientos ${activeFilter === "all" ? "" : activeFilter} próximos programados actualmente.`
+              }
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              {currentLanguage === "en"
+                ? "Please check back later or try a different filter."
+                : "Por favor, vuelva más tarde o pruebe con un filtro diferente."
+              }
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredEvents.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-[#003057] text-white py-8 mt-12">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-sm opacity-75">
+            {currentLanguage === "en"
+              ? "© 2025 McCall Behavioral Health Network. All rights reserved."
+              : "© 2025 McCall Behavioral Health Network. Todos los derechos reservados."}
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+============================================================
+END OF FILE: app/page.tsx
+============================================================
+
+
+------------------------------------------------------------
+FILE: app/test-events/page.tsx
+SIZE: 10221 bytes
+MODIFIED: 2025-06-27T13:35:06.513354
+------------------------------------------------------------
+
+// app/test-events/page.tsx
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { LogoHeader } from '@/components/ui/logo-header'
+import { TrainingFilter } from '@/components/training-filter'
+import type { Event } from '@/lib/types'
+import { formatDate, formatTimeRange } from '@/lib/utils'
+import { MapPin, Clock, Trash2, Plus, RefreshCw } from 'lucide-react'
+
+export default function TestEventsPage() {
+  const [events, setEvents] = useState<Event[]>([])
+  const [loading, setLoading] = useState(true)
+  const [message, setMessage] = useState<string>('')
+  const [activeFilter, setActiveFilter] = useState<'all' | 'MHFA' | 'QPR'>('all')
+
+  const fetchEvents = async () => {
+    try {
+      const response = await fetch('/api/events')
+      const data = await response.json()
+      setEvents(data.events || [])
+    } catch (error) {
+      console.error('Failed to fetch events:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchEvents()
+  }, [])
+
+  const deleteEvent = async (eventId: string) => {
+    if (!confirm('Are you sure you want to delete this event?')) return
+
+    try {
+      const response = await fetch(`/api/events/${eventId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        setMessage(`Event ${eventId} deleted successfully!`)
+        fetchEvents()
+      } else {
+        const error = await response.json()
+        setMessage(`Error: ${error.error}`)
+      }
+    } catch (error) {
+      setMessage(`Error: ${error}`)
+    }
+  }
+
+  const addTestEvent = async () => {
+    const newEvent = {
+      title: `Test Event - ${new Date().toLocaleTimeString()}`,
+      date: '2025-12-31',
+      startTime: '10:00',
+      endTime: '12:00',
+      location: 'Test Location',
+      address: '123 Test Street, Test City, CT 06000',
+      trainingType: 'MHFA' as const,
+      language: 'en' as const,
+      googleFormBaseUrl: 'https://docs.google.com/forms/d/test',
+      dateEntryId: 'entry.test',
+      locationEntryId: 'entry.test'
+    }
+
+    try {
+      const response = await fetch('/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newEvent)
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setMessage(`Event created: ${data.event.id}`)
+        fetchEvents()
+      } else {
+        const error = await response.json()
+        setMessage(`Error: ${error.error}`)
+      }
+    } catch (error) {
+      setMessage(`Error: ${error}`)
+    }
+  }
+
+  // Filter events based on active filter
+  const filteredEvents = events.filter(event => 
+    activeFilter === 'all' || event.trainingType === activeFilter
+  )
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-mccall-cream">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-mccall-navy border-t-transparent mx-auto"></div>
+              <p className="mt-4 text-mccall-navy font-medium">Loading events...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-mccall-cream">
+      {/* Header */}
+      <div className="bg-mccall-gradient-blue">
+        <div className="container mx-auto px-4 py-8">
+          <LogoHeader className="mb-6" />
+          <div className="text-center text-white">
+            <h1 className="text-4xl font-bold mb-2">Event Database Test</h1>
+            <p className="text-xl text-white/90">Admin Testing Interface</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Action Buttons */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-mccall-navy">Database Operations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-4">
+              <Button 
+                onClick={addTestEvent}
+                className="bg-mccall-green hover:bg-mccall-green/90 text-white rounded-full"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Test Event
+              </Button>
+              <Button 
+                onClick={fetchEvents}
+                variant="outline"
+                className="border-mccall-navy text-mccall-navy hover:bg-mccall-navy hover:text-white rounded-full"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Refresh Events
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Status Message */}
+        {message && (
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-yellow-800">{message}</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Stats & Filter */}
+        <div className="mb-6 space-y-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div>
+                  <p className="text-3xl font-bold text-mccall-navy">{events.length}</p>
+                  <p className="text-sm text-gray-600">Total Events</p>
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-mccall-green">
+                    {events.filter(e => e.trainingType === 'MHFA').length}
+                  </p>
+                  <p className="text-sm text-gray-600">MHFA Events</p>
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-mccall-green">
+                    {events.filter(e => e.trainingType === 'QPR').length}
+                  </p>
+                  <p className="text-sm text-gray-600">QPR Events</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <h2 className="text-xl font-semibold text-mccall-navy">
+                  Filter Events ({filteredEvents.length} shown)
+                </h2>
+                <TrainingFilter
+                  activeFilter={activeFilter}
+                  onFilterChange={setActiveFilter}
+                  currentLanguage="en"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Events Grid */}
+        {filteredEvents.length === 0 ? (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-12">
+                <p className="text-gray-600 text-lg">
+                  {events.length === 0 ? 'No events found. Create your first event to get started.' : 'No events match the current filter.'}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-6">
+            {filteredEvents.map((event) => (
+              <Card key={event.id} className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
+                {/* Top accent bar */}
+                <div className={`h-2 ${
+                  event.trainingType === 'MHFA' ? 'bg-mccall-gradient-blue' : 'bg-mccall-gradient-green'
+                }`} />
+                
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <CardTitle className="text-xl text-mccall-navy mb-2">{event.title}</CardTitle>
+                      <div className="text-xs text-gray-500 mb-3">ID: {event.id}</div>
+                      <div className="flex items-center gap-2 text-gray-600 text-sm mb-2">
+                        <Clock className="w-4 h-4" />
+                        <span>{formatDate(event.date)} • {formatTimeRange(event.startTime, event.endTime)}</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <MapPin className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-700">{event.location}</p>
+                          {event.address && (
+                            <p className="text-sm text-gray-600">{event.address}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col items-end gap-3">
+                      <span className={`px-4 py-1.5 text-xs font-bold rounded-full ${
+                        event.trainingType === "MHFA" 
+                          ? "bg-mccall-navy text-white" 
+                          : "bg-mccall-green text-white"
+                      }`}>
+                        {event.trainingType}
+                      </span>
+                      
+                      <Button
+                        onClick={() => deleteEvent(event.id)}
+                        variant="outline"
+                        size="sm"
+                        className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+============================================================
+END OF FILE: app/test-events/page.tsx
+============================================================
+
+
+--- End of app directory (10 files) ---
+
+
+==================== COMPONENTS DIRECTORY ====================
+
+
+------------------------------------------------------------
+FILE: components/event-card.tsx
+SIZE: 2574 bytes
+MODIFIED: 2025-06-27T13:35:06.513354
+------------------------------------------------------------
+
+import { Button } from "@/components/ui/button";
+import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Event } from "@/lib/types";
+import { formatDate, formatTimeRange, generatePrefillUrl } from "@/lib/utils";
+import { MapPin, Clock } from "lucide-react";
+
+interface EventCardProps {
+  event: Event;
+}
+
+export function EventCard({ event }: EventCardProps) {
+  const prefillUrl = generatePrefillUrl(event);
+  
+  return (
+    <Card className="w-full lg:h-full lg:flex lg:flex-col border-0 shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
+      {/* Top accent bar - always blue */}
+      <div className="h-2 bg-mccall-gradient-blue" />
+      
+      <CardHeader className="pb-3 lg:flex-1">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1">
+            <CardTitle className="text-xl text-mccall-navy mb-3 h-[3rem] flex items-start">{event.title}</CardTitle>
+            <div className="space-y-2">
+              <div className="flex items-start gap-2 text-gray-600 text-sm">
+                <Clock className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <div>
+                  <div>{formatDate(event.date)}</div>
+                  <div>{formatTimeRange(event.startTime, event.endTime)}</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-gray-700">{event.location}</p>
+                  {event.address && (
+                    <p className="text-sm text-gray-600 select-all">{event.address}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+          <span className={`px-4 py-1.5 text-xs font-bold rounded-full ${
+            event.trainingType === "MHFA" 
+              ? "bg-[#003057] text-white" 
+              : "bg-[#80bc00] text-white"
+          }`}>
+            {event.trainingType}
+          </span>
+        </div>
+      </CardHeader>
+      
+      <CardFooter className="pt-6">
+        <Button 
+          asChild 
+          className="w-full bg-[#80bc00] hover:bg-[#6ca000] text-white font-semibold py-6 text-base rounded-full transition-colors"
+        >
+          <a href={prefillUrl} target="_blank" rel="noopener noreferrer">
+            Register
+          </a>
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
+
+============================================================
+END OF FILE: components/event-card.tsx
+============================================================
+
+
+------------------------------------------------------------
+FILE: components/training-filter.tsx
+SIZE: 2161 bytes
+MODIFIED: 2025-06-27T13:35:06.513354
+------------------------------------------------------------
+
+import { Button } from "@/components/ui/button";
+
+type FilterOption = "all" | "MHFA" | "QPR";
+
+interface TrainingFilterProps {
+  activeFilter: FilterOption;
+  onFilterChange: (filter: FilterOption) => void;
+  currentLanguage?: "en" | "es";
+}
+
+export function TrainingFilter({
+  activeFilter,
+  onFilterChange,
+  currentLanguage = "en",
+}: TrainingFilterProps) {
+  return (
+    /*  NEW:
+        – justify-center (default) centers the buttons on narrow screens
+        – sm:justify-start switches back to left-align at ≥640 px   */
+    <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
+      <Button
+        onClick={() => onFilterChange("MHFA")}
+        variant={activeFilter === "MHFA" ? "default" : "outline"}
+        className={`
+          rounded-full px-6 py-2 font-semibold transition-all
+          ${
+            activeFilter === "MHFA"
+              ? "bg-[#003057] hover:bg-[#054a76] text-white border-0"
+              : "bg-white hover:bg-gray-50 text-[#003057] border-2 border-[#003057]"
+          }
+        `}
+      >
+        MHFA
+      </Button>
+
+      <Button
+        onClick={() => onFilterChange("QPR")}
+        variant={activeFilter === "QPR" ? "default" : "outline"}
+        className={`
+          rounded-full px-6 py-2 font-semibold transition-all
+          ${
+            activeFilter === "QPR"
+              ? "bg-[#80bc00] hover:bg-[#6ca000] text-white border-0"
+              : "bg-white hover:bg-gray-50 text-[#80bc00] border-2 border-[#80bc00]"
+          }
+        `}
+      >
+        QPR
+      </Button>
+
+      <Button
+        onClick={() => onFilterChange("all")}
+        variant={activeFilter === "all" ? "default" : "outline"}
+        className={`
+          rounded-full px-6 py-2 font-semibold transition-all
+          ${
+            activeFilter === "all"
+              ? "bg-gray-800 hover:bg-gray-900 text-white border-0"
+              : "bg-white hover:bg-gray-50 text-gray-800 border-2 border-gray-300"
+          }
+        `}
+      >
+        {currentLanguage === "en" ? "Show All" : "Mostrar Todo"}
+      </Button>
+    </div>
+  );
+}
+
+
+============================================================
+END OF FILE: components/training-filter.tsx
+============================================================
+
+
+------------------------------------------------------------
+FILE: components/ui/button.tsx
+SIZE: 1868 bytes
+MODIFIED: 2025-06-27T13:35:06.513354
+------------------------------------------------------------
+
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "@/lib/utils"
+
+const buttonVariants = cva(
+  // Base styles - accessible, modern, and professional
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? "span" : "button"
+    return (
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    )
+  }
+)
+Button.displayName = "Button"
+
+export { Button, buttonVariants }
+
+============================================================
+END OF FILE: components/ui/button.tsx
+============================================================
+
+
+------------------------------------------------------------
+FILE: components/ui/card.tsx
+SIZE: 1961 bytes
+MODIFIED: 2025-06-27T13:35:06.513354
+------------------------------------------------------------
+
+import React from "react"
+import { cn } from "@/lib/utils"
+
+export const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        "rounded-lg border bg-card text-card-foreground shadow-sm",
+        className
+      )}
+      {...props}
+    />
+  )
+)
+Card.displayName = "Card"
+
+export const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn("flex flex-col space-y-1.5 p-6", className)}
+      {...props}
+    />
+  )
+)
+CardHeader.displayName = "CardHeader"
+
+export const CardTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTMLHeadingElement>>(
+  ({ className, ...props }, ref) => (
+    <h3
+      ref={ref}
+      className={cn(
+        "text-2xl font-semibold leading-none tracking-tight",
+        className
+      )}
+      {...props}
+    />
+  )
+)
+CardTitle.displayName = "CardTitle"
+
+export const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
+  ({ className, ...props }, ref) => (
+    <p
+      ref={ref}
+      className={cn("text-sm text-muted-foreground", className)}
+      {...props}
+    />
+  )
+)
+CardDescription.displayName = "CardDescription"
+
+export const CardContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+  )
+)
+CardContent.displayName = "CardContent"
+
+export const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn("flex items-center p-6 pt-0", className)}
+      {...props}
+    />
+  )
+)
+CardFooter.displayName = "CardFooter"
+
+============================================================
+END OF FILE: components/ui/card.tsx
+============================================================
+
+
+------------------------------------------------------------
+FILE: components/ui/dialog.tsx
+SIZE: 3971 bytes
+MODIFIED: 2025-06-27T13:35:06.513354
+------------------------------------------------------------
+
+"use client"
+
+import * as React from "react"
+import * as DialogPrimitive from "@radix-ui/react-dialog"
+import { X } from "lucide-react"
+
+import { cn } from "@/lib/utils"
+
+const Dialog = DialogPrimitive.Root
+
+const DialogTrigger = DialogPrimitive.Trigger
+
+const DialogPortal = DialogPrimitive.Portal
+
+const DialogClose = DialogPrimitive.Close
+
+const DialogOverlay = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Overlay
+    ref={ref}
+    className={cn(
+      "fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      className
+    )}
+    {...props}
+  />
+))
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
+
+const DialogContent = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
+>(({ className, children, ...props }, ref) => (
+  <DialogPortal>
+    <DialogOverlay />
+    <DialogPrimitive.Content
+      ref={ref}
+      className={cn(
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+        className
+      )}
+      {...props}
+    >
+      {children}
+      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+        <X className="h-4 w-4" />
+        <span className="sr-only">Close</span>
+      </DialogPrimitive.Close>
+    </DialogPrimitive.Content>
+  </DialogPortal>
+))
+DialogContent.displayName = DialogPrimitive.Content.displayName
+
+const DialogHeader = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col space-y-1.5 text-center sm:text-left",
+      className
+    )}
+    {...props}
+  />
+)
+DialogHeader.displayName = "DialogHeader"
+
+const DialogFooter = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      className
+    )}
+    {...props}
+  />
+)
+DialogFooter.displayName = "DialogFooter"
+
+const DialogTitle = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Title>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Title
+    ref={ref}
+    className={cn(
+      "text-lg font-semibold leading-none tracking-tight",
+      className
+    )}
+    {...props}
+  />
+))
+DialogTitle.displayName = DialogPrimitive.Title.displayName
+
+const DialogDescription = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Description
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+))
+DialogDescription.displayName = DialogPrimitive.Description.displayName
+
+export {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogTrigger,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+}
+
+
+============================================================
+END OF FILE: components/ui/dialog.tsx
+============================================================
+
+
+------------------------------------------------------------
+FILE: components/ui/language-toggle.tsx
+SIZE: 3146 bytes
+MODIFIED: 2025-06-27T13:35:06.513354
+------------------------------------------------------------
+
+"use client";
+
+import { useState } from "react";
+import { Languages } from "lucide-react";
+
+type Language = "en" | "es";
+
+interface LanguageToggleProps {
+  onLanguageChange?: (language: Language) => void;
+}
+
+export function LanguageToggle({ onLanguageChange }: LanguageToggleProps) {
+  const [currentLanguage, setCurrentLanguage] = useState<Language>("en");
+  const [hasHovered, setHasHovered] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+
+  const handleToggle = () => {
+    const newLanguage = currentLanguage === "en" ? "es" : "en";
+    setCurrentLanguage(newLanguage);
+    onLanguageChange?.(newLanguage);
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovering(true);
+    if (!hasHovered) {
+      setHasHovered(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+  };
+
+  return (
+    <button
+      onClick={handleToggle}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className="relative inline-flex items-center bg-white rounded-full p-1 pr-2 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+      aria-label={`Switch to ${currentLanguage === "en" ? "Spanish" : "English"}`}
+    >
+      {/* Language icon */}
+      <Languages className="w-4 h-4 text-gray-600 ml-1.5 mr-1 flex-shrink-0" />
+      
+      {/* Toggle switch */}
+      <div className="relative bg-gray-100 rounded-full p-0.5">
+        {/* Sliding background with micro-interaction */}
+        <div
+          className={`absolute inset-y-0.5 w-1/2 bg-[#80bc00] rounded-full transition-transform ${
+            hasHovered ? "duration-200" : "duration-500"
+          } ${
+            currentLanguage === "es" 
+              ? "translate-x-full" 
+              : "translate-x-0"
+          } ${
+            // Micro-interaction: slight movement on first hover
+            isHovering && !hasHovered
+              ? currentLanguage === "en" 
+                ? "translate-x-2" 
+                : "translate-x-[calc(100%-8px)]"
+              : ""
+          }`}
+          style={{ left: "2px" }}
+        />
+        
+        {/* Toggle labels */}
+        <div className="relative flex pointer-events-none">
+          <div
+            className={`relative z-10 px-3 sm:px-4 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 select-none ${
+              currentLanguage === "en"
+                ? "text-white"
+                : "text-gray-600"
+            }`}
+          >
+            <span className="hidden sm:inline">English</span>
+            <span className="sm:hidden">EN</span>
+          </div>
+          
+          <div
+            className={`relative z-10 px-3 sm:px-4 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 select-none ${
+              currentLanguage === "es"
+                ? "text-white"
+                : "text-gray-600"
+            }`}
+          >
+            <span className="hidden sm:inline">Español</span>
+            <span className="sm:hidden">ES</span>
+          </div>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+============================================================
+END OF FILE: components/ui/language-toggle.tsx
+============================================================
+
+
+------------------------------------------------------------
+FILE: components/ui/logo-header.tsx
+SIZE: 1075 bytes
+MODIFIED: 2025-06-27T13:35:06.529058
+------------------------------------------------------------
+
+/* components/ui/logo-header.tsx */
+"use client";
+
+import Image from "next/image";
+
+interface LogoHeaderProps {
+  className?: string;
+}
+
+export function LogoHeader({ className = "" }: LogoHeaderProps) {
+  return (
+    /*  The className prop (for margins, etc.) sits on the <a>,
+        so whatever you pass from the parent still works.          */
+    <a
+      href="https://mccallbhn.org/"
+      className={`inline-block ${className}`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {/* screen-reader only: announces purpose of the link */}
+      <span className="sr-only">McCall Behavioral Health Network home page</span>
+
+      {/* Pill wrapper keeps its styling exactly as before */}
+      <div className="bg-white rounded-full pl-3 pr-8 py-3">
+        <Image
+          src="/img_assets/McCall BHN Full Color Logo.png"
+          alt="McCall Behavioral Health Network"
+          width={240}
+          height={60}
+          className="w-auto h-auto max-h-12"
+          priority
+        />
+      </div>
+    </a>
+  );
+}
+
+
+============================================================
+END OF FILE: components/ui/logo-header.tsx
+============================================================
+
+
+--- End of components directory (7 files) ---
+
+
+==================== LIB DIRECTORY ====================
+
+
+------------------------------------------------------------
+FILE: lib/auth-simple.ts
+SIZE: 3757 bytes
+MODIFIED: 2025-06-27T13:35:06.529920
+------------------------------------------------------------
+
+// lib/auth-simple.ts
+import { SignJWT, jwtVerify } from 'jose'
+import { cookies } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server'
+
+const SESSION_COOKIE_NAME = 'admin-session'
+const SESSION_DURATION = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
+
+// Get the secret key for JWT signing
+function getSecretKey(): Uint8Array {
+  const secret = process.env.NEXTAUTH_SECRET || 'fallback-secret-for-development'
+  return new TextEncoder().encode(secret)
+}
+
+// Interface for our session data - compatible with JWTPayload
+export interface SessionData {
+  username: string
+  role: 'admin'
+  expires: number
+  [key: string]: string | number // More specific than 'any' - JWT payloads are typically strings/numbers
+}
+
+// Validate credentials against environment variables
+export function validateCredentials(username: string, password: string): boolean {
+  const adminUsername = process.env.ADMIN_USERNAME
+  const adminPassword = process.env.ADMIN_PASSWORD
+
+  if (!adminUsername || !adminPassword) {
+    console.error('Admin credentials not configured in environment variables')
+    return false
+  }
+
+  return username === adminUsername && password === adminPassword
+}
+
+// Create a session token
+export async function createSession(username: string): Promise<string> {
+  const expires = Date.now() + SESSION_DURATION
+  const sessionData: SessionData = {
+    username,
+    role: 'admin',
+    expires
+  }
+
+  const token = await new SignJWT(sessionData)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime(new Date(expires))
+    .sign(getSecretKey())
+
+  return token
+}
+
+// Verify and decode a session token
+export async function verifySession(token: string): Promise<SessionData | null> {
+  try {
+    const { payload } = await jwtVerify(token, getSecretKey())
+    const sessionData = payload as unknown as SessionData
+
+    // Check if session has expired
+    if (Date.now() > sessionData.expires) {
+      return null
+    }
+
+    return sessionData
+  } catch (error) {
+    console.error('Session verification failed:', error)
+    return null
+  }
+}
+
+// Get current session from cookies (server-side)
+export async function getSession(): Promise<SessionData | null> {
+  const cookieStore = await cookies()
+  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)
+
+  if (!sessionCookie?.value) {
+    return null
+  }
+
+  return await verifySession(sessionCookie.value)
+}
+
+// Set session cookie in response
+export function setSessionCookie(response: NextResponse, token: string): void {
+  response.cookies.set({
+    name: SESSION_COOKIE_NAME,
+    value: token,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: SESSION_DURATION / 1000, // Convert to seconds
+    path: '/'
+  })
+}
+
+// Clear session cookie
+export function clearSessionCookie(response: NextResponse): void {
+  response.cookies.set({
+    name: SESSION_COOKIE_NAME,
+    value: '',
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 0,
+    path: '/'
+  })
+}
+
+// Check if user is authenticated (for middleware)
+export async function isAuthenticated(request: NextRequest): Promise<boolean> {
+  const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)
+  
+  if (!sessionCookie?.value) {
+    return false
+  }
+
+  const session = await verifySession(sessionCookie.value)
+  return session !== null
+}
+
+// Create redirect response for unauthorized access
+export function createLoginRedirect(request: NextRequest): NextResponse {
+  const loginUrl = new URL('/admin/login', request.url)
+  return NextResponse.redirect(loginUrl)
+}
+
+============================================================
+END OF FILE: lib/auth-simple.ts
+============================================================
+
+
+------------------------------------------------------------
+FILE: lib/constants.ts
+SIZE: 1349 bytes
+MODIFIED: 2025-06-27T13:35:06.529920
+------------------------------------------------------------
+
+// lib/constants.ts
+
+export const BRAND_COLORS = {
+  navy: '#003057',
+  midBlue: '#054a76',
+  green: '#80bc00',
+  lightGreen: '#bcd63e',
+  gold: '#ffc629',
+  lightGold: '#fbac40',
+  beige: '#f5f2e8',
+  cream: '#f4eee1'
+} as const;
+
+export const TRAINING_TYPES = {
+  MHFA: 'MHFA',
+  QPR: 'QPR'
+} as const;
+
+export const LANGUAGES = {
+  EN: 'en',
+  ES: 'es'
+} as const;
+
+export const URLS = {
+  MCCALL_HOME: 'https://mccallbhn.org/',
+  GOOGLE_FORMS: {
+    MHFA_EN: 'https://docs.google.com/forms/d/e/1FAIpQLSfw3r099XjHo2bHbydU-TQbgByD-giErYmzSRzhioaJfGxuKQ/viewform',
+    MHFA_ES: 'https://docs.google.com/forms/d/e/1FAIpQLSfH27T3aCWY8yZzF8OpDJ_hRbO54D_lGobW96T9aMxu5c9THA/viewform',
+    QPR_EN: 'https://docs.google.com/forms/d/e/1FAIpQLSdel9p7wqnEMN-zjgOLRr6JKYL33uv2RkH2jKOUxrW9LKpvZg/viewform',
+    QPR_ES: 'https://docs.google.com/forms/d/e/1FAIpQLSda55mbKZll96Q8Tytwrz8tmCf7fuvrhn0994HsUuBUxABm2g/viewform'
+  }
+} as const;
+
+export const FORM_ENTRY_IDS = {
+  DATE: 'entry.1753222212',
+  LOCATION: 'entry.679525213'
+} as const;
+
+export const DATE_FORMATS = {
+  DISPLAY: {
+    weekday: 'long' as const,
+    year: 'numeric' as const,
+    month: 'long' as const,
+    day: 'numeric' as const
+  },
+  TIME: {
+    hour: 'numeric' as const,
+    minute: '2-digit' as const,
+    hour12: true
+  }
+} as const;
+
+============================================================
+END OF FILE: lib/constants.ts
+============================================================
+
+
+------------------------------------------------------------
+FILE: lib/db/redis-client.ts
+SIZE: 3005 bytes
+MODIFIED: 2025-06-27T13:35:06.529920
+------------------------------------------------------------
+
+// lib/db/redis-client.ts
+import { createClient, RedisClientType } from 'redis'
+import type { Event } from '@/lib/types'
+
+// Singleton Redis connection
+let client: RedisClientType | null = null
+
+async function getRedisClient(): Promise<RedisClientType> {
+  if (!client) {
+    client = createClient({ url: process.env.REDIS_URL })
+    client.on('error', (err) => console.error('Redis Client Error:', err))
+    await client.connect()
+  }
+  return client
+}
+
+const EVENTS_KEY = 'events'
+const EVENT_COUNTER_KEY = 'event_counter'
+
+export class EventDatabase {
+  /* ----------  READ  ---------- */
+  static async getAllEvents(): Promise<Event[]> {
+    const redis = await getRedisClient()
+    const json = await redis.get(EVENTS_KEY)
+    return json ? (JSON.parse(json) as Event[]) : []
+  }
+
+  static async getEventById(id: string): Promise<Event | null> {
+    const events = await this.getAllEvents()
+    return events.find((e) => e.id === id) ?? null
+  }
+
+  /* ----------  CREATE  ---------- */
+  static async createEvent(
+    data: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<Event> {
+    const redis = await getRedisClient()
+    const events = await this.getAllEvents()
+    const counter = await redis.incr(EVENT_COUNTER_KEY)
+
+    const newEvent: Event = {
+      ...data,
+      id: `event_${counter}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+
+    await redis.set(EVENTS_KEY, JSON.stringify([...events, newEvent]))
+    return newEvent
+  }
+
+  /* ----------  UPDATE  ---------- */
+  static async updateEvent(id: string, updates: Partial<Event>): Promise<Event | null> {
+    const redis = await getRedisClient()
+    const events = await this.getAllEvents()
+    const index = events.findIndex((e) => e.id === id)
+    if (index === -1) return null
+
+    const updated: Event = {
+      ...events[index],
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    }
+
+    events[index] = updated
+    await redis.set(EVENTS_KEY, JSON.stringify(events))
+    return updated
+  }
+
+  /* ----------  DELETE  ---------- */
+  static async deleteEvent(id: string): Promise<boolean> {
+    const redis = await getRedisClient()
+    const events = await this.getAllEvents()
+    const filtered = events.filter((e) => e.id !== id)
+    if (filtered.length === events.length) return false
+    await redis.set(EVENTS_KEY, JSON.stringify(filtered))
+    return true
+  }
+
+  /* ----------  SEED (one-time)  ---------- */
+  static async seedDatabase(initialEvents: Event[]) {
+    const redis = await getRedisClient()
+    const existing = await this.getAllEvents()
+    if (existing.length) return
+    await redis.set(EVENTS_KEY, JSON.stringify(initialEvents))
+    await redis.set(EVENT_COUNTER_KEY, String(initialEvents.length))
+    console.log('Database seeded with initial events')
+  }
+}
+
+// Explicit export keeps TS happy in isolated-modules mode
+export { getRedisClient }
+
+
+============================================================
+END OF FILE: lib/db/redis-client.ts
+============================================================
+
+
+------------------------------------------------------------
+FILE: lib/db/seed.ts
+SIZE: 690 bytes
+MODIFIED: 2025-06-27T13:35:06.529920
+------------------------------------------------------------
+
+import { EventDatabase } from './redis-client'
+import { generateSampleEvents } from '@/lib/sample-data-generator'
+
+export async function seedDatabaseIfEmpty(): Promise<void> {
+  try {
+    const existingEvents = await EventDatabase.getAllEvents()
+    
+    if (existingEvents.length === 0) {
+      const sampleEvents = generateSampleEvents()
+      await EventDatabase.seedDatabase(sampleEvents)
+      console.log(`✅ Database seeded with ${sampleEvents.length} events`)
+    } else {
+      console.log(`ℹ️ Database already contains ${existingEvents.length} events`)
+    }
+  } catch (error) {
+    console.error('❌ Failed to seed database:', error)
+    throw error
+  }
+}
+
+============================================================
+END OF FILE: lib/db/seed.ts
+============================================================
+
+
+------------------------------------------------------------
+FILE: lib/hooks/useEventFilter.ts
+SIZE: 2597 bytes
+MODIFIED: 2025-06-27T13:35:06.529920
+------------------------------------------------------------
+
+// lib/hooks/useEventFilter.ts
+import { useState, useMemo } from 'react';
+import { Event, Language, TrainingType } from '@/lib/types';
+import { enrichEventForDisplay, sortEventsByDate } from '@/lib/utils';
+
+export type FilterOption = 'all' | TrainingType;
+
+interface UseEventFilterOptions {
+  initialLanguage?: Language;
+  initialFilter?: FilterOption;
+  sortAscending?: boolean;
+}
+
+export function useEventFilter(
+  events: Event[],
+  options: UseEventFilterOptions = {}
+) {
+  const {
+    initialLanguage = 'en',
+    initialFilter = 'all',
+    sortAscending = true
+  } = options;
+
+  const [currentLanguage, setCurrentLanguage] = useState<Language>(initialLanguage);
+  const [activeFilter, setActiveFilter] = useState<FilterOption>(initialFilter);
+
+  const filteredAndSortedEvents = useMemo(() => {
+    // Apply language filter
+    let filtered = events.filter(event => event.language === currentLanguage);
+    
+    // Apply training type filter
+    if (activeFilter !== 'all') {
+      filtered = filtered.filter(event => event.trainingType === activeFilter);
+    }
+    
+    // Sort by date
+    const sorted = sortEventsByDate(filtered, sortAscending);
+    
+    // Enrich with display properties
+    return sorted.map(enrichEventForDisplay);
+  }, [events, currentLanguage, activeFilter, sortAscending]);
+
+  const eventCounts = useMemo(() => {
+    const languageEvents = events.filter(event => event.language === currentLanguage);
+    
+    return {
+      all: languageEvents.length,
+      MHFA: languageEvents.filter(e => e.trainingType === 'MHFA').length,
+      QPR: languageEvents.filter(e => e.trainingType === 'QPR').length
+    };
+  }, [events, currentLanguage]);
+
+  const upcomingEventCounts = useMemo(() => {
+    const languageEvents = events
+      .filter(event => event.language === currentLanguage)
+      .map(enrichEventForDisplay)
+      .filter(event => event.isUpcoming);
+    
+    return {
+      all: languageEvents.length,
+      MHFA: languageEvents.filter(e => e.trainingType === 'MHFA').length,
+      QPR: languageEvents.filter(e => e.trainingType === 'QPR').length
+    };
+  }, [events, currentLanguage]);
+
+  return {
+    // State
+    currentLanguage,
+    activeFilter,
+    
+    // Setters
+    setCurrentLanguage,
+    setActiveFilter,
+    
+    // Computed values
+    filteredEvents: filteredAndSortedEvents,
+    eventCounts,
+    upcomingEventCounts,
+    
+    // Utilities
+    hasEvents: filteredAndSortedEvents.length > 0,
+    hasUpcomingEvents: filteredAndSortedEvents.some(e => e.isUpcoming)
+  };
+}
+
+============================================================
+END OF FILE: lib/hooks/useEventFilter.ts
+============================================================
+
+
+------------------------------------------------------------
+FILE: lib/i18n/translations.ts
+SIZE: 1737 bytes
+MODIFIED: 2025-06-27T13:35:06.529920
+------------------------------------------------------------
+
+// lib/i18n/translations.ts
+
+const translations = {
+  en: {
+    common: {
+      register: "Register",
+      showAll: "Show All",
+      noEvents: "No trainings are currently scheduled.",
+      checkBackLater: "Please check back later or try a different filter.",
+      copyright: "© 2025 McCall Behavioral Health Network. All rights reserved."
+    },
+    hero: {
+      title: "Mental Health Training Programs",
+      description: "Join us for professional development opportunities in Mental Health First Aid (MHFA) and Question, Persuade, Refer (QPR) suicide prevention training."
+    },
+    accessibility: {
+      logoAlt: "McCall Behavioral Health Network",
+      homePage: "McCall Behavioral Health Network home page",
+      switchLanguage: "Switch to Spanish"
+    }
+  },
+  es: {
+    common: {
+      register: "Registrarse",
+      showAll: "Mostrar Todo",
+      noEvents: "No hay entrenamientos programados actualmente.",
+      checkBackLater: "Por favor, vuelva más tarde o pruebe con un filtro diferente.",
+      copyright: "© 2025 McCall Behavioral Health Network. Todos los derechos reservados."
+    },
+    hero: {
+      title: "Programas de Capacitación en Salud Mental",
+      description: "Únase a nosotros para oportunidades de desarrollo profesional en Primeros Auxilios de Salud Mental (MHFA) y capacitación en prevención del suicidio Preguntar, Persuadir, Referir (QPR)."
+    },
+    accessibility: {
+      logoAlt: "McCall Behavioral Health Network",
+      homePage: "Página principal de McCall Behavioral Health Network",
+      switchLanguage: "Cambiar a inglés"
+    }
+  }
+} as const;
+
+export { translations };
+
+export type TranslationKey = keyof typeof translations.en;
+
+============================================================
+END OF FILE: lib/i18n/translations.ts
+============================================================
+
+
+------------------------------------------------------------
+FILE: lib/i18n/useTranslation.ts
+SIZE: 628 bytes
+MODIFIED: 2025-06-27T13:35:06.529920
+------------------------------------------------------------
+
+// lib/i18n/useTranslation.ts
+import { translations } from './translations';
+import { Language } from '@/lib/types';
+
+export function useTranslation(language: Language) {
+  const t = (key: string): string => {
+    const keys = key.split('.');
+    let value: unknown = translations[language];
+    
+    for (const k of keys) {
+      if (value && typeof value === 'object' && k in value) {
+        value = (value as Record<string, unknown>)[k];
+      } else {
+        return key; // Return the key if path not found
+      }
+    }
+    
+    return typeof value === 'string' ? value : key;
+  };
+
+  return { t };
+}
+
+============================================================
+END OF FILE: lib/i18n/useTranslation.ts
+============================================================
+
+
+------------------------------------------------------------
+FILE: lib/sample-data-generator.ts
+SIZE: 3834 bytes
+MODIFIED: 2025-06-27T13:35:06.529920
+------------------------------------------------------------
+
+// lib/sample-data-generator.ts
+import { Event, TrainingType, Language } from '@/lib/types';
+import { URLS, FORM_ENTRY_IDS } from '@/lib/constants';
+
+interface EventTemplate {
+  title: string;
+  location: string;
+  address?: string;
+  startTime: string;
+  endTime: string;
+  trainingType: TrainingType;
+  language: Language;
+}
+
+const eventTemplates: EventTemplate[] = [
+  // English MHFA Templates
+  {
+    title: "Mental Health First Aid - Adult Certification",
+    location: "Torrington Behavioral Health District",
+    address: "350 Main Street, Torrington, CT 06790",
+    startTime: "09:00",
+    endTime: "17:00",
+    trainingType: "MHFA",
+    language: "en"
+  },
+  {
+    title: "Youth Mental Health First Aid Training",
+    location: "Community Health Center Waterbury",
+    address: "625 Wolcott Street, Waterbury, CT 06705",
+    startTime: "13:00",
+    endTime: "20:30",
+    trainingType: "MHFA",
+    language: "en"
+  },
+  // English QPR Templates
+  {
+    title: "QPR Gatekeeper Training - Basic",
+    location: "Hartford Healthcare Behavioral Center",
+    address: "80 Meriden Avenue, Southington, CT 06489",
+    startTime: "14:00",
+    endTime: "16:30",
+    trainingType: "QPR",
+    language: "en"
+  },
+  // Spanish MHFA Templates
+  {
+    title: "Primeros Auxilios de Salud Mental - Adultos",
+    location: "New Opportunities of Greater Torrington",
+    address: "100 Water Street, Torrington, CT 06790",
+    startTime: "09:00",
+    endTime: "17:00",
+    trainingType: "MHFA",
+    language: "es"
+  },
+  // Spanish QPR Templates
+  {
+    title: "QPR - Prevención del Suicidio",
+    location: "Hispanic Alliance of Northwestern CT",
+    address: "417 Main Street, Winsted, CT 06098",
+    startTime: "14:00",
+    endTime: "16:30",
+    trainingType: "QPR",
+    language: "es"
+  }
+];
+
+function getGoogleFormUrl(trainingType: TrainingType, language: Language): string {
+  const key = `${trainingType}_${language.toUpperCase()}` as keyof typeof URLS.GOOGLE_FORMS;
+  return URLS.GOOGLE_FORMS[key];
+}
+
+function generateEventId(date: string, trainingType: string): string {
+  const dateStr = date.replace(/-/g, '_');
+  const typeStr = trainingType.toLowerCase();
+  const random = Math.random().toString(36).substring(2, 6);
+  return `event_${dateStr}_${typeStr}_${random}`;
+}
+
+export function generateSampleEvents(count: number = 20): Event[] {
+  const events: Event[] = [];
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+  
+  for (let i = 0; i < count; i++) {
+    const template = eventTemplates[i % eventTemplates.length];
+    
+    // Generate dates spread across upcoming months
+    const monthOffset = Math.floor(i / 4); // Spread events across months
+    const dayOffset = (i % 20) + 5; // Days 5-25 of each month
+    
+    const eventDate = new Date(currentYear, currentMonth + monthOffset, dayOffset);
+    const dateString = eventDate.toISOString().split('T')[0];
+    
+    const event: Event = {
+      id: generateEventId(dateString, template.trainingType),
+      title: template.title,
+      date: dateString,
+      startTime: template.startTime,
+      endTime: template.endTime,
+      location: template.location,
+      address: template.address,
+      trainingType: template.trainingType,
+      language: template.language,
+      googleFormBaseUrl: getGoogleFormUrl(template.trainingType, template.language),
+      dateEntryId: FORM_ENTRY_IDS.DATE,
+      locationEntryId: FORM_ENTRY_IDS.LOCATION,
+      isActive: true,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString()
+    };
+    
+    events.push(event);
+  }
+  
+  return events;
+}
+
+// Export a generated set of sample events
+export const sampleEvents = generateSampleEvents(20);
+
+============================================================
+END OF FILE: lib/sample-data-generator.ts
+============================================================
+
+
+------------------------------------------------------------
+FILE: lib/sample-data.ts
+SIZE: 10508 bytes
+MODIFIED: 2025-06-27T13:35:06.529920
+------------------------------------------------------------
+
+import { Event } from "@/lib/types";
+
+// Sample events including both MHFA and QPR trainings with addresses and times
+export const sampleEvents: Event[] = [
+  // English MHFA Events
+  {
+    id: "event_2025_07_15_mhfa_adult",
+    title: "Mental Health First Aid - Adult Certification",
+    date: "2025-07-15",
+    startTime: "09:00",
+    endTime: "17:00",
+    location: "Torrington Behavioral Health District",
+    address: "350 Main Street, Torrington, CT 06790",
+    trainingType: "MHFA",
+    language: "en",
+    googleFormBaseUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfw3r099XjHo2bHbydU-TQbgByD-giErYmzSRzhioaJfGxuKQ/viewform",
+    dateEntryId: "entry.1753222212",
+    locationEntryId: "entry.679525213",
+    isActive: true,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z"
+  },
+  {
+    id: "event_2025_07_22_mhfa_youth",
+    title: "Youth Mental Health First Aid Training",
+    date: "2025-07-22",
+    startTime: "13:00",
+    endTime: "20:30",
+    location: "Community Health Center Waterbury",
+    address: "625 Wolcott Street, Waterbury, CT 06705",
+    trainingType: "MHFA",
+    language: "en",
+    googleFormBaseUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfw3r099XjHo2bHbydU-TQbgByD-giErYmzSRzhioaJfGxuKQ/viewform",
+    dateEntryId: "entry.1753222212",
+    locationEntryId: "entry.679525213",
+    isActive: true,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z"
+  },
+  // English QPR Events
+  {
+    id: "event_2025_07_18_qpr_basic",
+    title: "QPR Gatekeeper Training - Basic",
+    date: "2025-07-18",
+    startTime: "14:00",
+    endTime: "16:30",
+    location: "Hartford Healthcare Behavioral Center",
+    address: "80 Meriden Avenue, Southington, CT 06489",
+    trainingType: "QPR",
+    language: "en",
+    googleFormBaseUrl: "https://docs.google.com/forms/d/e/1FAIpQLSdel9p7wqnEMN-zjgOLRr6JKYL33uv2RkH2jKOUxrW9LKpvZg/viewform",
+    dateEntryId: "entry.1753222212",
+    locationEntryId: "entry.679525213",
+    isActive: true,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z"
+  },
+  {
+    id: "event_2025_08_05_mhfa_virtual",
+    title: "Virtual MHFA Adult - Online Session",
+    date: "2025-08-05",
+    startTime: "10:00",
+    endTime: "18:00",
+    location: "Online via Zoom",
+    trainingType: "MHFA",
+    language: "en",
+    googleFormBaseUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfw3r099XjHo2bHbydU-TQbgByD-giErYmzSRzhioaJfGxuKQ/viewform",
+    dateEntryId: "entry.1753222212",
+    locationEntryId: "entry.679525213",
+    isActive: true,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z"
+  },
+  {
+    id: "event_2025_08_12_qpr_advanced",
+    title: "QPR Train-the-Trainer Workshop",
+    date: "2025-08-12",
+    startTime: "09:00",
+    endTime: "15:30",
+    location: "Yale New Haven Health System",
+    address: "20 York Street, New Haven, CT 06510",
+    trainingType: "QPR",
+    language: "en",
+    googleFormBaseUrl: "https://docs.google.com/forms/d/e/1FAIpQLSdel9p7wqnEMN-zjgOLRr6JKYL33uv2RkH2jKOUxrW9LKpvZg/viewform",
+    dateEntryId: "entry.1753222212",
+    locationEntryId: "entry.679525213",
+    isActive: true,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z"
+  },
+  {
+    id: "event_2025_08_19_mhfa_teen",
+    title: "Teen Mental Health First Aid",
+    date: "2025-08-19",
+    startTime: "15:30",
+    endTime: "19:00",
+    location: "Middlesex Community College",
+    address: "100 Training Hill Road, Middletown, CT 06457",
+    trainingType: "MHFA",
+    language: "en",
+    googleFormBaseUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfw3r099XjHo2bHbydU-TQbgByD-giErYmzSRzhioaJfGxuKQ/viewform",
+    dateEntryId: "entry.1753222212",
+    locationEntryId: "entry.679525213",
+    isActive: true,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z"
+  },
+  {
+    id: "event_2025_08_29_qpr_mccall",
+    title: "QPR Suicide Prevention Training",
+    date: "2025-08-29",
+    startTime: "11:00",
+    endTime: "13:00",
+    location: "McCall Behavioral Health Training Center",
+    address: "58 High Street, Torrington, CT 06790",
+    trainingType: "QPR",
+    language: "en",
+    googleFormBaseUrl: "https://docs.google.com/forms/d/e/1FAIpQLSdel9p7wqnEMN-zjgOLRr6JKYL33uv2RkH2jKOUxrW9LKpvZg/viewform",
+    dateEntryId: "entry.1753222212",
+    locationEntryId: "entry.679525213",
+    isActive: true,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z"
+  },
+  
+  // Spanish MHFA Events
+  {
+    id: "event_2025_08_27_mhfa_spanish",
+    title: "Primeros Auxilios de Salud Mental - Adultos",
+    date: "2025-08-27",
+    startTime: "09:00",
+    endTime: "17:00",
+    location: "New Opportunities of Greater Torrington",
+    address: "100 Water Street, Torrington, CT 06790",
+    trainingType: "MHFA",
+    language: "es",
+    googleFormBaseUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfH27T3aCWY8yZzF8OpDJ_hRbO54D_lGobW96T9aMxu5c9THA/viewform",
+    dateEntryId: "entry.1753222212",
+    locationEntryId: "entry.679525213",
+    isActive: true,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z"
+  },
+  {
+    id: "event_2025_09_03_mhfa_spanish_waterbury",
+    title: "MHFA en Español - Sesión para Adultos",
+    date: "2025-09-03",
+    startTime: "18:00",
+    endTime: "21:30",
+    location: "New Britain Community Center",
+    address: "27 West Main Street, New Britain, CT 06051",
+    trainingType: "MHFA",
+    language: "es",
+    googleFormBaseUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfH27T3aCWY8yZzF8OpDJ_hRbO54D_lGobW96T9aMxu5c9THA/viewform",
+    dateEntryId: "entry.1753222212",
+    locationEntryId: "entry.679525213",
+    isActive: true,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z"
+  },
+  {
+    id: "event_2025_09_10_mhfa_spanish_youth",
+    title: "Primeros Auxilios de Salud Mental - Jóvenes",
+    date: "2025-09-10",
+    startTime: "10:00",
+    endTime: "18:00",
+    location: "Hartford Public Library",
+    address: "500 Main Street, Hartford, CT 06103",
+    trainingType: "MHFA",
+    language: "es",
+    googleFormBaseUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfH27T3aCWY8yZzF8OpDJ_hRbO54D_lGobW96T9aMxu5c9THA/viewform",
+    dateEntryId: "entry.1753222212",
+    locationEntryId: "entry.679525213",
+    isActive: true,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z"
+  },
+  {
+    id: "event_2025_10_01_mhfa_spanish_bridgeport",
+    title: "MHFA Adultos - Certificación en Español",
+    date: "2025-10-01",
+    startTime: "13:00",
+    endTime: "20:30",
+    location: "Bridgeport Hospital",
+    address: "267 Grant Street, Bridgeport, CT 06610",
+    trainingType: "MHFA",
+    language: "es",
+    googleFormBaseUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfH27T3aCWY8yZzF8OpDJ_hRbO54D_lGobW96T9aMxu5c9THA/viewform",
+    dateEntryId: "entry.1753222212",
+    locationEntryId: "entry.679525213",
+    isActive: true,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z"
+  },
+  
+  // Spanish QPR Events
+  {
+    id: "event_2025_09_23_qpr_spanish",
+    title: "QPR - Prevención del Suicidio",
+    date: "2025-09-23",
+    startTime: "14:00",
+    endTime: "16:30",
+    location: "Hispanic Alliance of Northwestern CT",
+    address: "417 Main Street, Winsted, CT 06098",
+    trainingType: "QPR",
+    language: "es",
+    googleFormBaseUrl: "https://docs.google.com/forms/d/e/1FAIpQLSda55mbKZll96Q8Tytwrz8tmCf7fuvrhn0994HsUuBUxABm2g/viewform",
+    dateEntryId: "entry.1753222212",
+    locationEntryId: "entry.679525213",
+    isActive: true,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z"
+  },
+  {
+    id: "event_2025_08_14_qpr_spanish_stamford",
+    title: "Capacitación QPR - Guardianes de la Vida",
+    date: "2025-08-14",
+    startTime: "18:00",
+    endTime: "20:00",
+    location: "Stamford Health Medical Center",
+    address: "One Hospital Plaza, Stamford, CT 06902",
+    trainingType: "QPR",
+    language: "es",
+    googleFormBaseUrl: "https://docs.google.com/forms/d/e/1FAIpQLSda55mbKZll96Q8Tytwrz8tmCf7fuvrhn0994HsUuBUxABm2g/viewform",
+    dateEntryId: "entry.1753222212",
+    locationEntryId: "entry.679525213",
+    isActive: true,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z"
+  },
+  {
+    id: "event_2025_09_05_qpr_spanish_norwalk",
+    title: "QPR en Español - Sesión Básica",
+    date: "2025-09-05",
+    startTime: "11:00",
+    endTime: "13:30",
+    location: "Norwalk Community Health Center",
+    address: "120 Connecticut Avenue, Norwalk, CT 06850",
+    trainingType: "QPR",
+    language: "es",
+    googleFormBaseUrl: "https://docs.google.com/forms/d/e/1FAIpQLSda55mbKZll96Q8Tytwrz8tmCf7fuvrhn0994HsUuBUxABm2g/viewform",
+    dateEntryId: "entry.1753222212",
+    locationEntryId: "entry.679525213",
+    isActive: true,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z"
+  },
+  {
+    id: "event_2025_10_08_qpr_spanish_virtual",
+    title: "QPR Virtual - Prevención del Suicidio",
+    date: "2025-10-08",
+    startTime: "19:00",
+    endTime: "21:00",
+    location: "En línea vía Zoom",
+    trainingType: "QPR",
+    language: "es",
+    googleFormBaseUrl: "https://docs.google.com/forms/d/e/1FAIpQLSda55mbKZll96Q8Tytwrz8tmCf7fuvrhn0994HsUuBUxABm2g/viewform",
+    dateEntryId: "entry.1753222212",
+    locationEntryId: "entry.679525213",
+    isActive: true,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z"
+  },
+  {
+    id: "event_2025_10_21_qpr_spanish_danbury",
+    title: "Entrenamiento QPR - Formador de Formadores",
+    date: "2025-10-21",
+    startTime: "09:00",
+    endTime: "15:30",
+    location: "Danbury Hospital",
+    address: "24 Hospital Avenue, Danbury, CT 06810",
+    trainingType: "QPR",
+    language: "es",
+    googleFormBaseUrl: "https://docs.google.com/forms/d/e/1FAIpQLSda55mbKZll96Q8Tytwrz8tmCf7fuvrhn0994HsUuBUxABm2g/viewform",
+    dateEntryId: "entry.1753222212",
+    locationEntryId: "entry.679525213",
+    isActive: true,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z"
+  }
+];
+
+============================================================
+END OF FILE: lib/sample-data.ts
+============================================================
+
+
+------------------------------------------------------------
+FILE: lib/types.ts
+SIZE: 811 bytes
+MODIFIED: 2025-06-27T13:35:06.529920
+------------------------------------------------------------
+
+export type TrainingType = "MHFA" | "QPR";
+export type Language = "en" | "es";
+
+export interface Event {
+  id: string;
+  title: string;
+  date: string;
+  startTime: string;  
+  endTime: string;   
+  location: string;
+  address?: string;   
+  trainingType: TrainingType;
+  language: Language;  // NEW: Language property
+  googleFormBaseUrl: string;
+  dateEntryId: string;
+  locationEntryId: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  timeZone?: string;
+}
+
+export interface UrlValidationResult {
+  isValid: boolean;
+  status?: number;
+  error?: string;
+  url: string;
+}
+
+export interface EventDisplay extends Event {
+  isUpcoming: boolean;
+  displayDate: string;
+  displayTime: string;
+  prefillUrl: string;
+  urlValidation?: UrlValidationResult;
+}
+
+============================================================
+END OF FILE: lib/types.ts
+============================================================
+
+
+------------------------------------------------------------
+FILE: lib/utils.ts
+SIZE: 4265 bytes
+MODIFIED: 2025-06-27T13:35:06.529920
+------------------------------------------------------------
+
+// lib/utils.ts - Complete file with archive functionality
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+import type { Event, EventDisplay } from "@/lib/types"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+/**
+ * Format a date string (YYYY-MM-DD) into a readable format
+ */
+export function formatDate(dateString: string): string {
+  try {
+    const date = new Date(dateString + 'T00:00:00') // Add time to avoid timezone issues
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric', 
+      month: 'long',
+      day: 'numeric'
+    })
+  } catch {
+    return dateString // Return original if parsing fails
+  }
+}
+
+/**
+ * Format time range from start and end times (HH:MM format)
+ */
+export function formatTimeRange(startTime: string, endTime: string): string {
+  try {
+    const formatTime = (time: string) => {
+      const [hours, minutes] = time.split(':')
+      const date = new Date()
+      date.setHours(parseInt(hours), parseInt(minutes))
+      return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      })
+    }
+    
+    return `${formatTime(startTime)} - ${formatTime(endTime)}`
+  } catch {
+    return `${startTime} - ${endTime}` // Return original if parsing fails
+  }
+}
+
+/**
+ * Generate a pre-filled Google Form URL for an event
+ */
+export function generatePrefillUrl(event: Event): string {
+  if (!event.googleFormBaseUrl) {
+    return '#' // Return empty anchor if no form URL
+  }
+  
+  const url = new URL(event.googleFormBaseUrl)
+  
+  // Add pre-filled entries if they exist
+  if (event.dateEntryId) {
+    url.searchParams.set(event.dateEntryId, formatDate(event.date))
+  }
+  
+  if (event.locationEntryId && event.location) {
+    const locationText = event.address 
+      ? `${event.location}, ${event.address}`
+      : event.location
+    url.searchParams.set(event.locationEntryId, locationText)
+  }
+  
+  return url.toString()
+}
+
+/**
+ * Enrich event data with additional display properties
+ */
+export function enrichEventForDisplay(event: Event): EventDisplay {
+  const now = new Date()
+  const eventDate = new Date(event.date)
+  const isUpcoming = eventDate >= now
+  
+  return {
+    ...event,
+    displayDate: formatDate(event.date),
+    displayTime: formatTimeRange(event.startTime, event.endTime),
+    prefillUrl: generatePrefillUrl(event),
+    isUpcoming
+  }
+}
+
+/**
+ * Sort events by date (earliest first by default, or latest first if ascending = false)
+ */
+export function sortEventsByDate(events: Event[], ascending: boolean = true): Event[] {
+  return [...events].sort((a, b) => {
+    const dateA = new Date(a.date + 'T' + a.startTime)
+    const dateB = new Date(b.date + 'T' + b.startTime)
+    const diff = dateA.getTime() - dateB.getTime()
+    return ascending ? diff : -diff
+  })
+}
+
+/**
+ * Check if an event date has passed (is archived)
+ */
+export function isEventArchived(eventDate: string): boolean {
+  const today = new Date()
+  const event = new Date(eventDate + 'T23:59:59') // End of event day
+  
+  // Reset today to start of day for fair comparison
+  today.setHours(0, 0, 0, 0)
+  
+  return event < today
+}
+
+/**
+ * Filter events based on archive status
+ */
+export function filterEventsByArchiveStatus(events: Event[], showArchived: boolean = false): Event[] {
+  return events.filter(event => {
+    const archived = isEventArchived(event.date)
+    return showArchived ? archived : !archived
+  })
+}
+
+/**
+ * Get event counts by archive status
+ */
+export function getEventCounts(events: Event[]) {
+  const active = events.filter(event => !isEventArchived(event.date))
+  const archived = events.filter(event => isEventArchived(event.date))
+  
+  return {
+    active: {
+      total: active.length,
+      MHFA: active.filter(e => e.trainingType === 'MHFA').length,
+      QPR: active.filter(e => e.trainingType === 'QPR').length,
+    },
+    archived: {
+      total: archived.length,
+      MHFA: archived.filter(e => e.trainingType === 'MHFA').length,
+      QPR: archived.filter(e => e.trainingType === 'QPR').length,
+    }
+  }
+}
+
+============================================================
+END OF FILE: lib/utils.ts
+============================================================
+
+
+--- End of lib directory (11 files) ---
+
+
+======================================================================
+COMBINATION SUMMARY
+======================================================================
+Total files processed: 44
+Files included: 43
+Files skipped: 1
+
+Skipped files:
+  - package-lock.json (binary/excluded)
+
+Generation completed: 2025-06-30T09:18:05.335047

@@ -1,0 +1,59 @@
+Files collected from: C:\Users\nathan.lannan\mhfa-registration
+Collection date: 2025-06-30T09:15:47.865500
+Total files: 46
+----------------------------------------------------------------------
+
+=== ROOT DIRECTORY ===
+.env.local
+.gitignore
+components.json
+eslint.config.mjs
+Handoff.md
+middleware.ts
+next-env.d.ts
+next.config.ts
+package-lock.json
+package.json
+postcss.config.js
+postcss.config.mjs
+README.md
+tailwind.config.js
+tsconfig.json
+vercel.json
+
+=== APP DIRECTORY ===
+app\admin\login\page.tsx
+app\admin\page.tsx
+app\api\events\[id]\route.ts
+app\api\events\route.ts
+app\api\test-auth\route.ts
+app\api\test-db\route.ts
+app\Current.png
+app\favicon.ico
+app\globals.css
+app\layout.tsx
+app\page.tsx
+app\test-events\page.tsx
+
+=== COMPONENTS DIRECTORY ===
+components\event-card.tsx
+components\training-filter.tsx
+components\ui\button.tsx
+components\ui\card.tsx
+components\ui\dialog.tsx
+components\ui\language-toggle.tsx
+components\ui\logo-header.tsx
+
+=== LIB DIRECTORY ===
+lib\auth-simple.ts
+lib\constants.ts
+lib\db\redis-client.ts
+lib\db\seed.ts
+lib\hooks\useEventFilter.ts
+lib\i18n\translations.ts
+lib\i18n\useTranslation.ts
+lib\sample-data-generator.ts
+lib\sample-data.ts
+lib\types.ts
+lib\utils.ts
+
